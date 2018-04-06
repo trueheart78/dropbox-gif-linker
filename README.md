@@ -14,7 +14,7 @@ create a new shareable link via the Dropbox API.
 Data displayed includes the name of the id gif, its directories, basename, size, number of times 
 used, and the data copied to the clipboard
 
-![listener example](listener-example.gif)
+![listener example](assets/images/listener-example.gif)
 
 ![taylor.gif](https://dl.dropboxusercontent.com/s/rhkozj2hwt82bc7/taylor.gif)
 
