@@ -25,6 +25,10 @@ func ModeShift(mode string) string {
 	return color.LightCyan(fmt.Sprintf("♪ mode shifted to %v ♪", mode))
 }
 
+func InputError(err error) string {
+	return color.Red(fmt.Sprintf("Error reading input: %v", err))
+}
+
 func spacing() string {
 	return "               "
 }

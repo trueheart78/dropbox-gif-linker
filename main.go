@@ -1,14 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/trueheart78/dropbox-gif-linker/commands"
 	"github.com/trueheart78/dropbox-gif-linker/messages"
+	"os"
+	"strings"
 )
-
-func goodbyeMessage() string {
-	return "Love you!"
-}
 
 func init() {
 	fmt.Println(messages.Welcome())
@@ -17,10 +16,11 @@ func init() {
 func main() {
 	var input string
 	mode := "url"
+	reader := bufio.NewReader(os.Stdin)
 	for {
 		fmt.Println(messages.AwaitingInput(mode))
-		fmt.Scanln(&input)
-
+		input, _ = reader.ReadString('\n')
+		input = strings.TrimSpace(input)
 		if commands.Exit(input) {
 			fmt.Println(messages.Goodbye())
 			break
@@ -31,7 +31,7 @@ func main() {
 			mode = "md"
 			fmt.Println(messages.ModeShift("md"))
 		} else {
-			fmt.Println("// parse content")
+			fmt.Printf("You entered: %v\n", input)
 		}
 	}
 }

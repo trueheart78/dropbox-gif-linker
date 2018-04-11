@@ -16,6 +16,8 @@ func TestExit(t *testing.T) {
 	assert.True(Exit("quit"))
 	assert.True(Exit(":quit"))
 	assert.True(Exit(":q"))
+
+	assert.False(Exit("url"))
 }
 
 func TestUrlMode(t *testing.T) {
@@ -25,6 +27,8 @@ func TestUrlMode(t *testing.T) {
 	assert.True(UrlMode("u"))
 	assert.True(UrlMode(":url"))
 	assert.True(UrlMode(":u"))
+
+	assert.False(UrlMode("exit"))
 }
 
 func TestMarkdownMode(t *testing.T) {
@@ -35,4 +39,6 @@ func TestMarkdownMode(t *testing.T) {
 	assert.True(MarkdownMode("m"))
 	assert.True(MarkdownMode(":md"))
 	assert.True(MarkdownMode(":m"))
+
+	assert.False(MarkdownMode("exit"))
 }
