@@ -5,11 +5,11 @@ import (
 	"testing"
 )
 
-type sampleError struct {
+type testError struct {
 	s string
 }
 
-func (e sampleError) Error() string {
+func (e testError) Error() string {
 	return e.s
 }
 
@@ -65,7 +65,7 @@ func TestCurrentMode(t *testing.T) {
 func TestInputError(t *testing.T) {
 	assert := assert.New(t)
 
-	err := sampleError{"sample error"}
+	err := testError{"sample error"}
 	received := InputError(err)
 	expected := "\x1b[0;31mError reading input: sample error\x1b[0m"
 
