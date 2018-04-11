@@ -20,7 +20,7 @@ func main() {
 	for {
 		fmt.Println(messages.AwaitingInput(mode))
 		input, _ = reader.ReadString('\n')
-		input = strings.TrimSpace(input)
+		input = strings.Trim(strings.TrimSpace(input), "\"'")
 		if commands.Exit(input) {
 			fmt.Println(messages.Goodbye())
 			break
