@@ -13,8 +13,20 @@ func Goodbye() string {
 	return fmt.Sprintf("%v %v %v", heart(), color.LightCyan("Goodbye"), heart())
 }
 
+func AwaitingInput(mode string) string {
+	return fmt.Sprintf("%v%v", color.LightPurple("Waiting for input..."), CurrentMode(mode))
+}
+
+func CurrentMode(mode string) string {
+	return fmt.Sprintf("%v%v %v %v", spacing(), note(), color.LightCyan(mode), note())
+}
+
 func ModeShift(mode string) string {
-	return fmt.Sprintf("               %v %v %v", note(), color.LightCyan(mode), note())
+	return color.LightCyan(fmt.Sprintf("♪ mode shifted to %v ♪", mode))
+}
+
+func spacing() string {
+	return "               "
 }
 
 func heart() string {
