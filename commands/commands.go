@@ -1,47 +1,43 @@
 package commands
 
-var commands = make(map[string]string)
+var exitCommands = make(map[string]bool)
+var urlCommands = make(map[string]bool)
+var markdownCommands = make(map[string]bool)
 
 func init() {
-	commands["exit"] = "exit"
-	commands[":exit"] = "exit"
-	commands["ex"] = "exit"
-	commands["e"] = "exit"
-	commands[":e"] = "exit"
-	commands["quit"] = "exit"
-	commands["q"] = "exit"
-	commands[":quit"] = "exit"
-	commands[":q"] = "exit"
+	exitCommands["exit"] = true
+	exitCommands[":exit"] = true
+	exitCommands["ex"] = true
+	exitCommands["e"] = true
+	exitCommands[":e"] = true
+	exitCommands["quit"] = true
+	exitCommands["q"] = true
+	exitCommands[":quit"] = true
+	exitCommands[":q"] = true
 
-	commands["url"] = "url"
-	commands["u"] = "url"
-	commands[":url"] = "url"
-	commands[":u"] = "url"
+	urlCommands["url"] = true
+	urlCommands["u"] = true
+	urlCommands[":url"] = true
+	urlCommands[":u"] = true
 
-	commands["markdown"] = "md"
-	commands["md"] = "md"
-	commands["m"] = "md"
-	commands[":md"] = "md"
-	commands[":m"] = "md"
+	markdownCommands["markdown"] = true
+	markdownCommands["md"] = true
+	markdownCommands["m"] = true
+	markdownCommands[":md"] = true
+	markdownCommands[":m"] = true
 }
 
 func Exit(input string) bool {
-	if commands[input] == "exit" {
-		return true
-	}
-	return false
+	_, exist := exitCommands[input]
+	return exist
 }
 
 func UrlMode(input string) bool {
-	if commands[input] == "url" {
-		return true
-	}
-	return false
+	_, exist := urlCommands[input]
+	return exist
 }
 
 func MarkdownMode(input string) bool {
-	if commands[input] == "md" {
-		return true
-	}
-	return false
+	_, exist := markdownCommands[input]
+	return exist
 }
