@@ -9,11 +9,21 @@ import (
 	"net/url"
 )
 
+// Client for the Dropbox API interactions
 type Client struct {
 }
 
-type basicPayload struct {
+type existingPayload struct {
 	RelativePath string `json:"path"`
+}
+
+type creationPayload struct {
+	RelativePath string         `json:"path"`
+	Settings     settingPayload `json:"settings"`
+}
+
+type settingPayload struct {
+	Visibility string `json:"requested_visibility"`
 }
 
 // NewClient create a new Client for interacting with Dropbox
@@ -44,12 +54,25 @@ func (c Client) exists(filename string) bool {
 }
 
 func (c Client) existingPayload(filename string) (buf bytes.Buffer) {
-	payload := basicPayload{filename}
+	payload := existingPayload{filename}
 	err := json.NewEncoder(&buf).Encode(&payload)
 	if err != nil {
 		fmt.Printf("There was an error encoding the json. err = %s", err)
 	}
 	return
+}
+
+func (c Client) creationPayload(filename string) (buf bytes.Buffer) {
+	payload := creationPayload{filename, c.settingPayload()}
+	err := json.NewEncoder(&buf).Encode(&payload)
+	if err != nil {
+		fmt.Printf("There was an error encoding the json. err = %s", err)
+	}
+	return
+}
+
+func (c Client) settingPayload() settingPayload {
+	return settingPayload{"public"}
 }
 
 func (c Client) creationURL() string {

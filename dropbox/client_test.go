@@ -12,7 +12,15 @@ var client = Client{}
 func TestExistingPayload(t *testing.T) {
 	filename := "gifs/def.gif"
 	data := client.existingPayload(filename)
-	assert.Equal(t, fmt.Sprintf("{\"path\":\"%v\"}\n", filename), data.String())
+	json := fmt.Sprintf("{\"path\":\"%v\"}\n", filename)
+	assert.Equal(t, json, data.String())
+}
+
+func TestCreationPayload(t *testing.T) {
+	filename := "gifs/def.gif"
+	data := client.creationPayload(filename)
+	json := fmt.Sprintf("{\"path\":\"%v\",\"settings\":{\"requested_visibility\":\"public\"}}\n", filename)
+	assert.Equal(t, json, data.String())
 }
 
 func TestExistingURL(t *testing.T) {
