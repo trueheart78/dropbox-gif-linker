@@ -14,7 +14,7 @@ ARMVAR=github.com/trueheart78/dropbox-gif-linker/cmd.BuildARM
 BINNAME=${NAME:-dropbox-gif-linker}
 
 # main.go path
-MAINGO="main.go"
+MAINGO="dropbox-gif-linker/main.go"
 
 createRelease() {
   os=$1
@@ -35,7 +35,6 @@ createRelease() {
                 osarch=ppc64
         else
     osarch=32bit
-
   fi
 
   ldflags="-X $OSVAR=$os -X $ARCHVAR=$arch"
