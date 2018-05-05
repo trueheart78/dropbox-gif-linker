@@ -1,42 +1,82 @@
-package config
+package dropbox
 
 import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 var validConfigFilename = fixturePath("valid")
-var invalidConfigFilename = fixturePath("non-existent")
+var emptyConfigFilename = fixturePath("empty")
+var missingConfigFilename = fixturePath("missing")
+
+var dropbox = DropboxConfig{}
 
 func fixturePath(filename string) string {
-	x, _ := os.Getwd()
-	return fmt.Sprintf("%v.json", filepath.Join(x, "fixtures", filename))
+	workingDir, _ := os.Getwd()
+	return fmt.Sprintf("%v.json", filepath.Join(workingDir, "fixtures", filename))
 }
 
-func TestConfigFilename(t *testing.T) {
+func TestConfigPath(t *testing.T) {
 	assert := assert.New(t)
 
-	expected := Dropbox.configPath(".dgl.json")
-	received := configFilename
-	assert.Equal(expected, received)
+	fullConfigPath := configPath(".dgl.json")
+	assert.True(strings.HasSuffix(fullConfigPath, configFilename))
+	assert.False(strings.HasPrefix(fullConfigPath, configFilename))
 }
 
-func TestExists(t *testing.T) {
+func TestConfigExists(t *testing.T) {
 	assert := assert.New(t)
 
-	assert.Equal(true, Dropbox.Exists(validConfigFilename))
-	assert.Equal(false, Dropbox.Exists(invalidConfigFilename))
+	assert.True(configExists(validConfigFilename))
+	assert.True(configExists(emptyConfigFilename))
+	assert.False(configExists(missingConfigFilename))
 }
 
-func TestDropboxConfig(t *testing.T) {
+func TestLoad(t *testing.T) {
 	assert := assert.New(t)
 
-	Dropbox.load(validConfigFilename)
+	// valid config
+	d := DropboxConfig{}
+	d.load(validConfigFilename)
 
-	assert.Equal("~/Dropbox", Dropbox.FullPath)
-	assert.Equal("gifs/", Dropbox.GifDir)
+	assert.Equal("~/Dropbox", d.FullPath)
+	assert.Equal("gifs/", d.GifDir)
+	assert.Equal("API_TOKEN", d.APIToken)
+	assert.Equal(validConfigFilename, d.ConfigPath)
+	assert.True(d.ConfigLoaded)
+
+	// empty config
+	d = DropboxConfig{}
+	d.load(emptyConfigFilename)
+
+	assert.Equal("", d.FullPath)
+	assert.Equal("", d.GifDir)
+	assert.Equal("", d.APIToken)
+	assert.Equal(emptyConfigFilename, d.ConfigPath)
+	assert.True(d.ConfigLoaded)
+
+	// missing config
+	d = DropboxConfig{}
+	d.load(missingConfigFilename)
+
+	assert.Equal("", d.FullPath)
+	assert.Equal("", d.GifDir)
+	assert.Equal("", d.APIToken)
+	assert.Equal(missingConfigFilename, d.ConfigPath)
+	assert.False(d.ConfigLoaded)
+}
+
+func TestValid(t *testing.T) {
+	assert := assert.New(t)
+
+	d := createFromConfig(validConfigFilename)
+	assert.True(d.valid())
+
+	d = createFromConfig(emptyConfigFilename)
+	assert.False(d.valid())
 }
