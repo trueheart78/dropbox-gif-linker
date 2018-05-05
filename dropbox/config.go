@@ -12,16 +12,17 @@ import (
 
 var configFilename = ".dgl.json"
 
-type DropboxConfig struct {
-	FullPath     string `json:"dropbox_path"`
-	GifDir       string `json:"dropbox_gif_dir"`
-	APIToken     string `json:"dropbox_api_token"`
-	ConfigPath   string
-	ConfigLoaded bool
+// Config is the object to be used when working with Client
+type Config struct {
+	DropboxPath string `json:"dropbox_path"`
+	GifDir      string `json:"dropbox_gif_dir"`
+	APIToken    string `json:"dropbox_api_token"`
+	Path        string
+	Loaded      bool
 }
 
-// LoadConfig attempts to load an existing configuration
-func LoadConfig() (d DropboxConfig, err error) {
+// NewConfig attempts to load an existing configuration
+func NewConfig() (d Config, err error) {
 	fullConfig := configPath(configFilename)
 	d = createFromConfig(fullConfig)
 	if !d.valid() {
@@ -30,28 +31,36 @@ func LoadConfig() (d DropboxConfig, err error) {
 	return
 }
 
-func (c DropboxConfig) valid() bool {
-	if !c.ConfigLoaded || c.FullPath == "" || c.GifDir == "" || c.APIToken == "" {
+// FullPath provides the full dropbox & gifs path
+func (c Config) FullPath() string {
+	if c.valid() {
+		return filepath.Join(c.DropboxPath, c.GifDir)
+	}
+	return ""
+}
+
+func (c Config) valid() bool {
+	if !c.Loaded || c.DropboxPath == "" || c.GifDir == "" || c.APIToken == "" {
 		return false
 	}
 	return true
 }
 
-func (c *DropboxConfig) load(configFilename string) (ok bool, err error) {
+func (c *Config) load(configFilename string) (ok bool, err error) {
 	var raw []byte
 	raw, err = ioutil.ReadFile(configFilename)
 	if err == nil {
 		json.Unmarshal(raw, c)
 		ok = true
 	}
-	c.ConfigPath = configFilename
+	c.Path = configFilename
 	if configExists(configFilename) {
-		c.ConfigLoaded = true
+		c.Loaded = true
 	}
 	return
 }
 
-func createFromConfig(configFilename string) (dropbox DropboxConfig) {
+func createFromConfig(configFilename string) (dropbox Config) {
 	_, err := dropbox.load(configFilename)
 	if err != nil {
 		panic(err)

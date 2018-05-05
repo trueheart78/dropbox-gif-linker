@@ -14,7 +14,7 @@ var validConfigFilename = fixturePath("valid")
 var emptyConfigFilename = fixturePath("empty")
 var missingConfigFilename = fixturePath("missing")
 
-var dropbox = DropboxConfig{}
+var dropbox = Config{}
 
 func fixturePath(filename string) string {
 	workingDir, _ := os.Getwd()
@@ -41,34 +41,34 @@ func TestLoad(t *testing.T) {
 	assert := assert.New(t)
 
 	// valid config
-	d := DropboxConfig{}
+	d := Config{}
 	d.load(validConfigFilename)
 
-	assert.Equal("~/Dropbox", d.FullPath)
+	assert.Equal("~/Dropbox", d.DropboxPath)
 	assert.Equal("gifs/", d.GifDir)
 	assert.Equal("API_TOKEN", d.APIToken)
-	assert.Equal(validConfigFilename, d.ConfigPath)
-	assert.True(d.ConfigLoaded)
+	assert.Equal(validConfigFilename, d.Path)
+	assert.True(d.Loaded)
 
 	// empty config
-	d = DropboxConfig{}
+	d = Config{}
 	d.load(emptyConfigFilename)
 
-	assert.Equal("", d.FullPath)
+	assert.Equal("", d.DropboxPath)
 	assert.Equal("", d.GifDir)
 	assert.Equal("", d.APIToken)
-	assert.Equal(emptyConfigFilename, d.ConfigPath)
-	assert.True(d.ConfigLoaded)
+	assert.Equal(emptyConfigFilename, d.Path)
+	assert.True(d.Loaded)
 
 	// missing config
-	d = DropboxConfig{}
+	d = Config{}
 	d.load(missingConfigFilename)
 
-	assert.Equal("", d.FullPath)
+	assert.Equal("", d.DropboxPath)
 	assert.Equal("", d.GifDir)
 	assert.Equal("", d.APIToken)
-	assert.Equal(missingConfigFilename, d.ConfigPath)
-	assert.False(d.ConfigLoaded)
+	assert.Equal(missingConfigFilename, d.Path)
+	assert.False(d.Loaded)
 }
 
 func TestValid(t *testing.T) {

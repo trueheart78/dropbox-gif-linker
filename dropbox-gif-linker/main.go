@@ -3,13 +3,23 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/trueheart78/dropbox-gif-linker/commands"
-	"github.com/trueheart78/dropbox-gif-linker/messages"
 	"os"
 	"strings"
+
+	"github.com/trueheart78/dropbox-gif-linker/commands"
+	"github.com/trueheart78/dropbox-gif-linker/dropbox"
+	"github.com/trueheart78/dropbox-gif-linker/messages"
 )
 
+var dropboxConfig dropbox.Config
+
 func init() {
+	dropboxConfig, err := dropbox.NewConfig()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	fmt.Println(dropboxConfig.FullPath())
 	fmt.Println(messages.Welcome())
 }
 
