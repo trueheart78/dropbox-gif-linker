@@ -1,6 +1,7 @@
 package dropbox
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -8,8 +9,18 @@ import (
 
 var client = Client{}
 
-func TestApiURL(t *testing.T) {
-	assert.Equal(t, "https://api.dropboxapi.com/2", client.apiURL())
+func TestExistingPayload(t *testing.T) {
+	filename := "gifs/def.gif"
+	data := client.existingPayload(filename)
+	assert.Equal(t, fmt.Sprintf("{\"path\":\"%v\"}\n", filename), data.String())
+}
+
+func TestExistingURL(t *testing.T) {
+	assert.Equal(t, "https://api.dropboxapi.com/2/sharing/list_shared_links", client.existingURL())
+}
+
+func TestCreationURL(t *testing.T) {
+	assert.Equal(t, "https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings", client.creationURL())
 }
 
 func TestCreationPath(t *testing.T) {
@@ -18,6 +29,14 @@ func TestCreationPath(t *testing.T) {
 
 func TestExistingPath(t *testing.T) {
 	assert.Equal(t, "sharing/list_shared_links", client.existingPath())
+}
+
+func TestApiURL(t *testing.T) {
+	assert.Equal(t, "https://api.dropboxapi.com/", client.apiURL().String())
+}
+
+func TestApiVersion(t *testing.T) {
+	assert.Equal(t, 2, client.apiVersion())
 }
 
 func TestNil(t *testing.T) {
