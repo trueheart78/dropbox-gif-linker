@@ -9,6 +9,8 @@ import (
 
 var client = Client{}
 
+// TODO: initialize the client / NewClient with a mocked server URL, see config for more details
+
 func TestThatThing(t *testing.T) {
 	filename := "gifs/def.gif"
 	ok, _ := client.exists(filename)
