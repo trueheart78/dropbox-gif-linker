@@ -31,10 +31,9 @@ func NewClient() (c Client) {
 	return c
 }
 
-func (c Client) exists(filename string) bool {
+func (c Client) exists(filename string) (ok bool, err error) {
 	data := c.existingPayload(filename)
 	request, err := http.NewRequest(http.MethodPost, c.existingURL(), &data)
-
 	if err != nil {
 		panic(err)
 	}
@@ -42,6 +41,13 @@ func (c Client) exists(filename string) bool {
 	request.Header.Set("Content-Type", "application/json")
 
 	result, err := http.DefaultClient.Do(request)
+
+	if result.StatusCode < 200 || result.StatusCode >= 300 {
+		err = fmt.Errorf("dropbox returned a %d", result.StatusCode)
+		return
+	}
+	fmt.Println(result.StatusCode)
+	fmt.Println(result)
 	if err != nil {
 		panic(err)
 	}
@@ -50,7 +56,7 @@ func (c Client) exists(filename string) bool {
 		panic(err)
 	}
 	result.Body.Close()
-	return false
+	return
 }
 
 func (c Client) existingPayload(filename string) (buf bytes.Buffer) {

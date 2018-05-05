@@ -9,6 +9,12 @@ import (
 
 var client = Client{}
 
+func TestThatThing(t *testing.T) {
+	filename := "gifs/def.gif"
+	ok, _ := client.exists(filename)
+	assert.False(t, ok)
+}
+
 func TestExistingPayload(t *testing.T) {
 	filename := "gifs/def.gif"
 	data := client.existingPayload(filename)
