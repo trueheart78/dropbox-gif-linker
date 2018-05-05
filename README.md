@@ -6,6 +6,20 @@ Designed to make working with your Dropbox gifs easier when wanting to share the
 
 Download the respective binary for your system, open a terminal, and execute it.
 
+## Configuration
+
+In your home directory, make sure to create `.dgl.json` file, and fill in the details:
+
+```json
+{
+	"dropbox_path" : "~/Dropbox",
+	"dropbox_gif_dir" : "gifs/",
+	"dropbox_api_token" : "YOUR_API_TOKEN"
+}
+```
+
+⚠️ The program will not load if you do not have this file setup correctly.
+
 ### `gif-listener`
 
 Listens for gif paths to be entered and checks with the local database before reaching out to 
