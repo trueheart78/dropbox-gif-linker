@@ -7,14 +7,35 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var client = Client{}
+var host = "https://sample.com"
+var version = 3
+var client = Client{
+	Host:    host,
+	Version: version,
+}
 
-// TODO: initialize the client / NewClient with a mocked server URL, see config for more details
-
-func TestThatThing(t *testing.T) {
+func skipTestThatThing(t *testing.T) {
 	filename := "gifs/def.gif"
 	ok, _ := client.exists(filename)
 	assert.False(t, ok)
+}
+
+func TestNewClient(t *testing.T) {
+	c := NewClient()
+	assert.Equal(t, "https://api.dropboxapi.com", c.Host)
+	assert.Equal(t, 2, c.Version)
+}
+
+func TestValid(t *testing.T) {
+	c := Client{}
+
+	assert.False(t, c.valid())
+
+	c.Host = "https://www.sample.com"
+	assert.False(t, c.valid())
+
+	c.Version = 1
+	assert.True(t, c.valid())
 }
 
 func TestExistingPayload(t *testing.T) {
@@ -32,11 +53,13 @@ func TestCreationPayload(t *testing.T) {
 }
 
 func TestExistingURL(t *testing.T) {
-	assert.Equal(t, "https://api.dropboxapi.com/2/sharing/list_shared_links", client.existingURL())
+	url := fmt.Sprintf("%v/%d/%v", host, version, "sharing/list_shared_links")
+	assert.Equal(t, url, client.existingURL())
 }
 
 func TestCreationURL(t *testing.T) {
-	assert.Equal(t, "https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings", client.creationURL())
+	url := fmt.Sprintf("%v/%d/%v", host, version, "sharing/create_shared_link_with_settings")
+	assert.Equal(t, url, client.creationURL())
 }
 
 func TestCreationPath(t *testing.T) {
@@ -48,11 +71,11 @@ func TestExistingPath(t *testing.T) {
 }
 
 func TestApiURL(t *testing.T) {
-	assert.Equal(t, "https://api.dropboxapi.com/", client.apiURL().String())
+	assert.Equal(t, host, client.apiURL().String())
 }
 
 func TestApiVersion(t *testing.T) {
-	assert.Equal(t, 2, client.apiVersion())
+	assert.Equal(t, version, client.apiVersion())
 }
 
 func TestNil(t *testing.T) {

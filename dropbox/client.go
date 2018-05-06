@@ -11,6 +11,8 @@ import (
 
 // Client for the Dropbox API interactions
 type Client struct {
+	Host    string
+	Version int
 }
 
 type existingPayload struct {
@@ -26,12 +28,24 @@ type settingPayload struct {
 	Visibility string `json:"requested_visibility"`
 }
 
-// NewClient create a new Client for interacting with Dropbox
+// NewClient creates a new Client for interacting with Dropbox
 func NewClient() (c Client) {
-	return c
+	c.Host = "https://api.dropboxapi.com"
+	c.Version = 2
+	return
+}
+
+func (c Client) valid() bool {
+	if c.Host == "" || c.Version == 0 {
+		return false
+	}
+	return true
 }
 
 func (c Client) exists(filename string) (ok bool, err error) {
+	if !c.valid() {
+		return
+	}
 	data := c.existingPayload(filename)
 	request, err := http.NewRequest(http.MethodPost, c.existingURL(), &data)
 	if err != nil {
@@ -94,7 +108,7 @@ func (c Client) existingURL() string {
 }
 
 func (c Client) apiURL() *url.URL {
-	u, err := url.Parse("https://api.dropboxapi.com/")
+	u, err := url.Parse(c.Host)
 	if err != nil {
 		panic(err)
 	}
@@ -110,5 +124,5 @@ func (c Client) existingPath() string {
 }
 
 func (c Client) apiVersion() int {
-	return 2
+	return c.Version
 }
