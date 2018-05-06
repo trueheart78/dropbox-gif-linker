@@ -2,22 +2,93 @@ package dropbox
 
 import (
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-var host = "https://sample.com"
+func stubInvalidAuth() *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resp := fmt.Sprintf("Error in call to API function \"%v\": The given OAuth 2 access token is malformed.", r.RequestURI)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(resp))
+	}))
+}
+
+func stubUnshared() *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("{\"links\": [], \"has_more\": false}"))
+	}))
+}
+
+func stubShared() *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resp := `
+		{
+			"links": [
+			{
+				".tag": "file",
+				"url": "https://www.dropbox.com/s/eqoo012hoa0wq7k/taylor%20bat%20focused.gif?dl=0",
+				"id": "id:tKL3Db9bgnoAAAAAAAAZnA",
+				"name": "taylor bat focused.gif",
+				"path_lower": "/gifs/taylor swift/lwymmd/taylor bat focused.gif",
+				"link_permissions": {
+					"resolved_visibility": {
+						".tag": "public"
+					},
+					"requested_visibility": {
+						".tag": "public"
+					},
+					"can_revoke": true
+				},
+				"client_modified": "2017-09-01T15:37:19Z",
+				"server_modified": "2017-12-01T16:37:11Z",
+				"rev": "5d050301f24e",
+				"size": 2078402
+			}
+			],
+			"has_more": false
+		}
+		`
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(resp))
+	}))
+}
+
+var host = "https://example-api.com"
 var version = 3
 var client = Client{
 	Host:    host,
 	Version: version,
 }
 
-func skipTestThatThing(t *testing.T) {
-	filename := "gifs/def.gif"
-	ok, _ := client.exists(filename)
+func TestExistsWithInvalidAuthServer(t *testing.T) {
+	c := NewClient()
+	apiStub := stubInvalidAuth()
+	c.Host = apiStub.URL
+	ok, _, err := c.exists("gifs/def.gif")
 	assert.False(t, ok)
+	assert.Equal(t, "dropbox returned a 400", err.Error())
+}
+
+func TestExistsWithNoLinks(t *testing.T) {
+	c := NewClient()
+	apiStub := stubUnshared()
+	c.Host = apiStub.URL
+	ok, _, _ := c.exists("gifs/def.gif")
+	assert.False(t, ok)
+}
+
+func TestExistsWithLinks(t *testing.T) {
+	c := NewClient()
+	apiStub := stubShared()
+	c.Host = apiStub.URL
+	ok, url, _ := c.exists("gifs/def.gif")
+	assert.True(t, ok)
+	assert.Equal(t, "xxx", url)
 }
 
 func TestNewClient(t *testing.T) {
@@ -63,19 +134,15 @@ func TestCreationURL(t *testing.T) {
 }
 
 func TestCreationPath(t *testing.T) {
-	assert.Equal(t, "sharing/create_shared_link_with_settings", client.creationPath())
+	assert.Equal(t, fmt.Sprintf("%d/sharing/create_shared_link_with_settings", client.Version), client.creationPath())
 }
 
 func TestExistingPath(t *testing.T) {
-	assert.Equal(t, "sharing/list_shared_links", client.existingPath())
+	assert.Equal(t, fmt.Sprintf("%d/sharing/list_shared_links", client.Version), client.existingPath())
 }
 
 func TestApiURL(t *testing.T) {
 	assert.Equal(t, host, client.apiURL().String())
-}
-
-func TestApiVersion(t *testing.T) {
-	assert.Equal(t, version, client.apiVersion())
 }
 
 func TestNil(t *testing.T) {

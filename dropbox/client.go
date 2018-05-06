@@ -28,6 +28,34 @@ type settingPayload struct {
 	Visibility string `json:"requested_visibility"`
 }
 
+type existsResponse struct {
+	Links   []existingLink `json:"links"`
+	HasMore bool           `json:"has_more"`
+}
+
+type existingLink struct {
+	Tag            string          `json:".tag"`
+	URL            string          `json:"url"`
+	ID             string          `json:"id"`
+	Name           string          `json:"name"`
+	Path           string          `json:"path_lower"`
+	Permissions    linkPermissions `json:"link_permissions"`
+	ClientModified string          `json:"client_modified"`
+	ServerModified string          `json:"server_modified"`
+	Revision       string          `json:"rev"`
+	FileSize       int             `json:"size"`
+}
+
+type linkPermissions struct {
+	ResolvedVisibility  linkTag `json:"resolved_visibility"`
+	RequestedVisibility linkTag `json:"requested_visibility"`
+	CanRevoke           bool    `json:"can_revoke"`
+}
+
+type linkTag struct {
+	Tag string `json:".tag"`
+}
+
 // NewClient creates a new Client for interacting with Dropbox
 func NewClient() (c Client) {
 	c.Host = "https://api.dropboxapi.com"
@@ -42,7 +70,7 @@ func (c Client) valid() bool {
 	return true
 }
 
-func (c Client) exists(filename string) (ok bool, err error) {
+func (c Client) exists(filename string) (ok bool, url string, err error) {
 	if !c.valid() {
 		return
 	}
@@ -53,24 +81,34 @@ func (c Client) exists(filename string) (ok bool, err error) {
 	}
 	request.Header.Set("Authorization", "API_TOKEN")
 	request.Header.Set("Content-Type", "application/json")
-
+	request.Header.Set("User-Agent", "Dropbox Gif Linker")
 	result, err := http.DefaultClient.Do(request)
 
-	if result.StatusCode < 200 || result.StatusCode >= 300 {
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	if result.StatusCode != http.StatusOK {
 		err = fmt.Errorf("dropbox returned a %d", result.StatusCode)
 		return
 	}
-	fmt.Println(result.StatusCode)
-	fmt.Println(result)
-	if err != nil {
-		panic(err)
-	}
-	_, err = ioutil.ReadAll(result.Body)
-	if err != nil {
-		panic(err)
+
+	var rawx []byte
+	var x existsResponse
+	rawx, err = ioutil.ReadAll(result.Body)
+	if err == nil {
+		json.Unmarshal(rawx, &x)
+		if len(x.Links) > 0 {
+			ok = true
+			url = x.Links[0].directLink()
+		}
 	}
 	result.Body.Close()
 	return
+}
+
+func (e existingLink) directLink() string {
+	return e.URL
 }
 
 func (c Client) existingPayload(filename string) (buf bytes.Buffer) {
@@ -97,13 +135,13 @@ func (c Client) settingPayload() settingPayload {
 
 func (c Client) creationURL() string {
 	u := c.apiURL()
-	u.Path = fmt.Sprintf("%d/%v", c.apiVersion(), c.creationPath())
+	u.Path = c.creationPath()
 	return u.String()
 }
 
 func (c Client) existingURL() string {
 	u := c.apiURL()
-	u.Path = fmt.Sprintf("%d/%v", c.apiVersion(), c.existingPath())
+	u.Path = c.existingPath()
 	return u.String()
 }
 
@@ -116,13 +154,9 @@ func (c Client) apiURL() *url.URL {
 }
 
 func (c Client) creationPath() string {
-	return "sharing/create_shared_link_with_settings"
+	return fmt.Sprintf("%d/sharing/create_shared_link_with_settings", c.Version)
 }
 
 func (c Client) existingPath() string {
-	return "sharing/list_shared_links"
-}
-
-func (c Client) apiVersion() int {
-	return c.Version
+	return fmt.Sprintf("%d/sharing/list_shared_links", c.Version)
 }
