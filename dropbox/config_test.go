@@ -83,7 +83,7 @@ func TestGifDirFix(t *testing.T) {
 	assert.Equal("/example/", d.GifDir)
 }
 
-func TestValid(t *testing.T) {
+func TestValidConfig(t *testing.T) {
 	assert := assert.New(t)
 
 	d := createFromConfig(validConfigFilename)

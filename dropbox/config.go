@@ -37,7 +37,7 @@ func NewConfig() (d Config, err error) {
 
 func (c *Config) gifDirFix() {
 	if c.GifDir != "" && !strings.HasPrefix(c.GifDir, "/") {
-		c.GifDir = strings.Join("/", c.GifDir)
+		c.GifDir = fmt.Sprintf("/%v", c.GifDir)
 	}
 }
 

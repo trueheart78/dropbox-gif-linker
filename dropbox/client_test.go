@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"path"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -35,9 +36,9 @@ func TestExistsWithNoLinks(t *testing.T) {
 
 func TestExistsWithLinks(t *testing.T) {
 	c := NewClient()
-	apiStub := stubShared()
+	apiStub := stubShared("/gifs/file name 1.gif")
 	c.Host = apiStub.URL
-	ok, url, _ := c.exists("gifs/def.gif")
+	ok, url, _ := c.exists("/gifs/file name 1.gif")
 	assert.True(t, ok)
 	assert.Equal(t, "https://www.dropbox.com/s/dropbox-hash/file%20name%201.gif", url)
 }
@@ -48,7 +49,7 @@ func TestNewClient(t *testing.T) {
 	assert.Equal(t, 2, c.Version)
 }
 
-func TestValid(t *testing.T) {
+func TestValidClient(t *testing.T) {
 	c := Client{}
 
 	assert.False(t, c.valid())
@@ -118,8 +119,10 @@ func stubUnshared() *httptest.Server {
 	}))
 }
 
-func stubShared() *httptest.Server {
+func stubShared(filePath string) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		basename := path.Base(filePath)
+		fmt.Println(basename)
 		resp := `
 		{
 			"links": [
