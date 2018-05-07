@@ -42,7 +42,7 @@ func TestExistsWithLinks(t *testing.T) {
 	c.Host = apiStub.URL
 	ok, url, _ := c.exists("/gifs/file name 1.gif")
 	assert.True(t, ok)
-	assert.Equal(t, "https://www.dropbox.com/s/dropbox-hash/file+name+1.gif", url)
+	assert.Equal(t, "https://dl.dropboxusercontent.com/s/dropbox-hash/file+name+1.gif", url)
 }
 
 func TestNewClient(t *testing.T) {

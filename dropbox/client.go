@@ -115,15 +115,16 @@ func (c Client) create(filename string) (ok bool, err error) {
 }
 
 // DirectLink returns the embeddable string
-// changes the host and removes the RawQuery to provide the correct URL
-// https://dl.dropboxusercontent.com/s/eqoo012hoa0wq7k/taylor%20bat%20focused.gif
-// https://www.dropbox.com/s/eqoo012hoa0wq7k/taylor%20bat%20focused.gif?dl=0
+// From: https://www.dropbox.com/s/eqoo012hoa0wq7k/taylor%20bat%20focused.gif?dl=0
+// To:   https://dl.dropboxusercontent.com/s/eqoo012hoa0wq7k/taylor%20bat%20focused.gif
 func (e Link) DirectLink() string {
 	u, err := url.Parse(e.URL)
 	if err != nil {
 		panic(err)
 	}
-	u.Host = "www.dropbox.com"
+	// change the host to point directly to the content
+	u.Host = "dl.dropboxusercontent.com"
+	// remove the dl=0 query
 	u.RawQuery = ""
 	return u.String()
 }
