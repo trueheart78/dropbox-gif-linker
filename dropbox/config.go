@@ -27,11 +27,18 @@ type Config struct {
 func NewConfig() (d Config, err error) {
 	fullConfig := configPath(configFilename)
 	d = createFromConfig(fullConfig)
+	d.gifDirFix()
 	ok, _ := d.valid()
 	if !ok {
 		err = fmt.Errorf("please validate the %v file. See README for details", fullConfig)
 	}
 	return
+}
+
+func (c *Config) gifDirFix() {
+	if c.GifDir != "" && !strings.HasPrefix(c.GifDir, "/") {
+		c.GifDir = strings.Join("/", c.GifDir)
+	}
 }
 
 // FullPath provides the full dropbox & gifs path

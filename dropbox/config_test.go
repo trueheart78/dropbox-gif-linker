@@ -73,6 +73,16 @@ func TestLoad(t *testing.T) {
 	assert.False(d.Loaded)
 }
 
+func TestGifDirFix(t *testing.T) {
+	assert := assert.New(t)
+
+	d := Config{GifDir: "example/"}
+
+	assert.Equal("example/", d.GifDir)
+	d.gifDirFix()
+	assert.Equal("/example/", d.GifDir)
+}
+
 func TestValid(t *testing.T) {
 	assert := assert.New(t)
 
@@ -92,6 +102,12 @@ func TestValid(t *testing.T) {
 	assert.False(ok)
 	assert.NotNil(err)
 	assert.Equal("the dropbox_gif_dir should be \"/gifs/\" instead of \"gifs/\"", err.Error())
+
+	d = createFromConfig(invalidDirConfigFilename)
+	d.gifDirFix()
+	ok, err = d.valid()
+	assert.True(ok)
+	assert.Nil(err)
 
 	d = createFromConfig(emptyConfigFilename)
 	ok, err = d.valid()
