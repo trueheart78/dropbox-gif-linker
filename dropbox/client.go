@@ -73,7 +73,7 @@ func (c Client) valid() bool {
 	return true
 }
 
-func (c Client) exists(filename string) (ok bool, url string, err error) {
+func (c Client) exists(filename string) (link Link, err error) {
 	if !c.valid() {
 		return
 	}
@@ -102,9 +102,11 @@ func (c Client) exists(filename string) (ok bool, url string, err error) {
 	if err == nil {
 		json.Unmarshal(rawBody, &exists)
 		if len(exists.Links) > 0 {
-			ok = true
-			url = exists.Links[0].DirectLink()
+			link = exists.Links[0]
+		} else {
+			err = fmt.Errorf("no existing link for %v", filename)
 		}
+
 	}
 	result.Body.Close()
 	return

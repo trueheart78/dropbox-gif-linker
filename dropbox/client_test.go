@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var missingFile = "gifs/def.gif"
 var host = "https://example-api.com"
 var version = 3
 var client = Client{
@@ -23,8 +24,7 @@ func TestExistsWithInvalidAuthServer(t *testing.T) {
 	c := NewClient()
 	apiStub := stubInvalidAuth()
 	c.Host = apiStub.URL
-	ok, _, err := c.exists("gifs/def.gif")
-	assert.False(t, ok)
+	_, err := c.exists(missingFile)
 	assert.Equal(t, "dropbox returned a 400", err.Error())
 }
 
@@ -32,17 +32,17 @@ func TestExistsWithNoLinks(t *testing.T) {
 	c := NewClient()
 	apiStub := stubUnshared()
 	c.Host = apiStub.URL
-	ok, _, _ := c.exists("gifs/def.gif")
-	assert.False(t, ok)
+	_, err := c.exists(missingFile)
+	assert.Equal(t, fmt.Sprintf("no existing link for %v", missingFile), err.Error())
 }
 
 func TestExistsWithLinks(t *testing.T) {
 	c := NewClient()
 	apiStub := stubShared("/gifs/file name 1.gif")
 	c.Host = apiStub.URL
-	ok, url, _ := c.exists("/gifs/file name 1.gif")
-	assert.True(t, ok)
-	assert.Equal(t, "https://dl.dropboxusercontent.com/s/dropbox-hash/file+name+1.gif", url)
+	url, err := c.exists("/gifs/file name 1.gif")
+	assert.Nil(t, err)
+	assert.Equal(t, "https://dl.dropboxusercontent.com/s/dropbox-hash/file+name+1.gif", url.DirectLink())
 }
 
 func TestNewClient(t *testing.T) {
@@ -64,16 +64,14 @@ func TestValidClient(t *testing.T) {
 }
 
 func TestExistingPayload(t *testing.T) {
-	filename := "gifs/def.gif"
-	data := client.existingPayload(filename)
-	json := fmt.Sprintf("{\"path\":\"%v\"}\n", filename)
+	data := client.existingPayload(missingFile)
+	json := fmt.Sprintf("{\"path\":\"%v\"}\n", missingFile)
 	assert.Equal(t, json, data.String())
 }
 
 func TestCreationPayload(t *testing.T) {
-	filename := "gifs/def.gif"
-	data := client.creationPayload(filename)
-	json := fmt.Sprintf("{\"path\":\"%v\",\"settings\":{\"requested_visibility\":\"public\"}}\n", filename)
+	data := client.creationPayload(missingFile)
+	json := fmt.Sprintf("{\"path\":\"%v\",\"settings\":{\"requested_visibility\":\"public\"}}\n", missingFile)
 	assert.Equal(t, json, data.String())
 }
 
