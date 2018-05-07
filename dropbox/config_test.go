@@ -11,6 +11,8 @@ import (
 )
 
 var validConfigFilename = fixturePath("valid")
+var invalidPathConfigFilename = fixturePath("invalid_path")
+var invalidDirConfigFilename = fixturePath("invalid_dir")
 var emptyConfigFilename = fixturePath("empty")
 var missingConfigFilename = fixturePath("missing")
 
@@ -45,7 +47,7 @@ func TestLoad(t *testing.T) {
 	d.load(validConfigFilename)
 
 	assert.Equal("~/Dropbox", d.DropboxPath)
-	assert.Equal("gifs/", d.GifDir)
+	assert.Equal("/gifs", d.GifDir)
 	assert.Equal("API_TOKEN", d.APIToken)
 	assert.Equal(validConfigFilename, d.Path)
 	assert.True(d.Loaded)
@@ -75,8 +77,24 @@ func TestValid(t *testing.T) {
 	assert := assert.New(t)
 
 	d := createFromConfig(validConfigFilename)
-	assert.True(d.valid())
+	ok, err := d.valid()
+	assert.True(ok)
+	assert.Nil(err)
+
+	d = createFromConfig(invalidPathConfigFilename)
+	ok, err = d.valid()
+	assert.False(ok)
+	assert.NotNil(err)
+	assert.Equal("the dropbox_path should be \"/Dropbox/\" instead of \"Dropbox/\"", err.Error())
+
+	d = createFromConfig(invalidDirConfigFilename)
+	ok, err = d.valid()
+	assert.False(ok)
+	assert.NotNil(err)
+	assert.Equal("the dropbox_gif_dir should be \"/gifs/\" instead of \"gifs/\"", err.Error())
 
 	d = createFromConfig(emptyConfigFilename)
-	assert.False(d.valid())
+	ok, err = d.valid()
+	assert.False(ok)
+	assert.NotNil(err)
 }

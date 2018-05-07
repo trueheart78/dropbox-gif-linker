@@ -2,10 +2,12 @@ package dropbox
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/mitchellh/go-homedir"
 )
@@ -25,7 +27,8 @@ type Config struct {
 func NewConfig() (d Config, err error) {
 	fullConfig := configPath(configFilename)
 	d = createFromConfig(fullConfig)
-	if !d.valid() {
+	ok, _ := d.valid()
+	if !ok {
 		err = fmt.Errorf("please validate the %v file. See README for details", fullConfig)
 	}
 	return
@@ -33,17 +36,32 @@ func NewConfig() (d Config, err error) {
 
 // FullPath provides the full dropbox & gifs path
 func (c Config) FullPath() string {
-	if c.valid() {
+	ok, _ := c.valid()
+	if ok {
 		return filepath.Join(c.DropboxPath, c.GifDir)
 	}
 	return ""
 }
 
-func (c Config) valid() bool {
-	if !c.Loaded || c.DropboxPath == "" || c.GifDir == "" || c.APIToken == "" {
-		return false
+func (c Config) valid() (ok bool, err error) {
+	if !c.Loaded {
+		err = errors.New("the config has yet to be loaded")
+		return
 	}
-	return true
+	if c.DropboxPath == "" || c.GifDir == "" || c.APIToken == "" {
+		err = errors.New("the config is incomplete")
+		return
+	}
+	if !strings.HasPrefix(c.DropboxPath, "~/") && !strings.HasPrefix(c.DropboxPath, "/") {
+		err = fmt.Errorf("the dropbox_path should be \"/%v\" instead of \"%v\"", c.DropboxPath, c.DropboxPath)
+		return
+	}
+	if !strings.HasPrefix(c.GifDir, "/") {
+		err = fmt.Errorf("the dropbox_gif_dir should be \"/%v\" instead of \"%v\"", c.GifDir, c.GifDir)
+		return
+	}
+	ok = true
+	return
 }
 
 func (c *Config) load(configFilename string) (ok bool, err error) {

@@ -1,5 +1,5 @@
 {
-	"dropbox_path" : "~/Dropbox",
+	"dropbox_path" : "Dropbox/",
 	"dropbox_gif_dir" : "/gifs",
 	"dropbox_api_token" : "API_TOKEN"
 }

@@ -107,8 +107,17 @@ func (c Client) exists(filename string) (ok bool, url string, err error) {
 	return
 }
 
+// changes the host and removes the RawQuery to provide the correct URL
+// https://dl.dropboxusercontent.com/s/eqoo012hoa0wq7k/taylor%20bat%20focused.gif
+// https://www.dropbox.com/s/eqoo012hoa0wq7k/taylor%20bat%20focused.gif?dl=0
 func (e existingLink) directLink() string {
-	return e.URL
+	u, err := url.Parse(e.URL)
+	if err != nil {
+		panic(err)
+	}
+	u.Host = "www.dropbox.com"
+	u.RawQuery = ""
+	return u.String()
 }
 
 func (c Client) existingPayload(filename string) (buf bytes.Buffer) {
