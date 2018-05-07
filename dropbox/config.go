@@ -92,9 +92,6 @@ func (c *Config) load(configFilename string) (ok bool, err error) {
 
 func createFromConfig(configFilename string) (dropbox Config, err error) {
 	_, err = dropbox.load(configFilename)
-	if err != nil {
-		return
-	}
 	return
 }
 
