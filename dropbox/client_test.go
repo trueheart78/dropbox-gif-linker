@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"path"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -40,7 +42,7 @@ func TestExistsWithLinks(t *testing.T) {
 	c.Host = apiStub.URL
 	ok, url, _ := c.exists("/gifs/file name 1.gif")
 	assert.True(t, ok)
-	assert.Equal(t, "https://www.dropbox.com/s/dropbox-hash/file%20name%201.gif", url)
+	assert.Equal(t, "https://www.dropbox.com/s/dropbox-hash/file+name+1.gif", url)
 }
 
 func TestNewClient(t *testing.T) {
@@ -121,36 +123,47 @@ func stubUnshared() *httptest.Server {
 
 func stubShared(filePath string) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		basename := path.Base(filePath)
-		fmt.Println(basename)
-		resp := `
-		{
-			"links": [
-			{
-				".tag": "file",
-				"url": "https://www.dropbox.com/s/dropbox-hash/file%20name%201.gif?dl=0",
-				"id": "id:DROPBOX_ID",
-				"name": "file name 1.gif",
-				"path_lower": "/gifs/examples/funny/file name 1.gif",
-				"link_permissions": {
-					"resolved_visibility": {
-						".tag": "public"
-					},
-					"requested_visibility": {
-						".tag": "public"
-					},
-					"can_revoke": true
-				},
-				"client_modified": "2017-09-01T15:37:19Z",
-				"server_modified": "2017-12-01T16:37:11Z",
-				"rev": "5d050301f24e",
-				"size": 2078402
-			}
-			],
-			"has_more": false
-		}
-		`
+		resp := craftExistingResponse(filePath)
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(resp))
 	}))
+}
+
+func craftExistingResponse(filePath string) string {
+	basename := path.Base(filePath)
+	basenameEscaped := url.QueryEscape(basename)
+	existingResponse := existingResponse()
+	existingResponse = strings.Replace(existingResponse, "URL_BASENAME", basenameEscaped, 1)
+	existingResponse = strings.Replace(existingResponse, "PATH_LOWER", filePath, 1)
+	return existingResponse
+}
+
+func existingResponse() string {
+	return `
+	{
+		"links": [
+		{
+			".tag": "file",
+			"url": "https://www.dropbox.com/s/dropbox-hash/URL_BASENAME?dl=0",
+			"id": "id:DROPBOX_ID",
+			"name": "file name 1.gif",
+			"path_lower": "/gifs/examples/funny/file name 1.gif",
+			"link_permissions": {
+				"resolved_visibility": {
+					".tag": "public"
+				},
+				"requested_visibility": {
+					".tag": "public"
+				},
+				"can_revoke": true
+			},
+			"client_modified": "2017-09-01T15:37:19Z",
+			"server_modified": "2017-12-01T16:37:11Z",
+			"rev": "5d050301f24e",
+			"size": 2078402
+		}
+		],
+		"has_more": false
+	}
+	`
 }
