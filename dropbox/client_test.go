@@ -129,15 +129,23 @@ func stubShared(filePath string) *httptest.Server {
 
 func stubCreationFailure() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("{\"links\": [], \"has_more\": false}"))
+		w.WriteHeader(http.StatusConflict)
+		w.Write([]byte(creationFailsResponse()))
 	}))
 }
 
-func stubCreationSuccess() *httptest.Server {
+func stubCreationExists() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusConflict)
+		w.Write([]byte(creationExistsResponse()))
+	}))
+}
+
+func stubCreationSuccess(filePath string) *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resp := craftCreationResponse(filePath)
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("{\"links\": [], \"has_more\": false}"))
+		w.Write([]byte(resp))
 	}))
 }
 
@@ -150,6 +158,16 @@ func craftExistingResponse(filePath string) string {
 	return response
 }
 
+func craftCreationResponse(filePath string) string {
+	basename := path.Base(filePath)
+	basenameEscaped := url.QueryEscape(basename)
+	response := creationValidResponse()
+	response = strings.Replace(response, "URL_BASENAME", basenameEscaped, 1)
+	response = strings.Replace(response, "PATH_LOWER", filePath, 1)
+	return response
+}
+
+//returns a 200 - OK
 func existingResponse() string {
 	return `
 	{
@@ -176,6 +194,59 @@ func existingResponse() string {
 		}
 		],
 		"has_more": false
+	}
+	`
+}
+
+// returns a 409 - Conflict
+func creationExistsResponse() string {
+	return `
+	{
+	   "error_summary": "shared_link_already_exists/..",
+	   "error": {
+	       ".tag": "shared_link_already_exists"
+	   }
+	}
+	`
+}
+
+// returns a 409 - Conflict
+func creationFailsResponse() string {
+	return `
+	{
+    "error_summary": "path/not_found/...",
+    "error": {
+        ".tag": "path",
+        "path": {
+            ".tag": "not_found"
+        }
+    }
+	}
+	`
+}
+
+// returns a 200 - OK
+func creationValidResponse() string {
+	return `
+	{
+		".tag": "file",
+		"url": "https://www.dropbox.com/s/dropbox-hash/URL_BASENAME?dl=0",
+		"id": "id:DROPBOX_ID",
+		"name": "file name 1.gif",
+		"path_lower": "/gifs/examples/funny/file name 1.gif",
+		"link_permissions": {
+			"resolved_visibility": {
+				".tag": "public"
+			},
+			"requested_visibility": {
+				".tag": "public"
+			},
+			"can_revoke": true
+		},
+		"client_modified": "2017-09-01T15:37:19Z",
+		"server_modified": "2017-12-01T16:37:11Z",
+		"rev": "5d050301f24e",
+		"size": 2078402
 	}
 	`
 }
