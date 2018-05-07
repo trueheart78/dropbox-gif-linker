@@ -9,55 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func stubInvalidAuth() *httptest.Server {
-	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		resp := fmt.Sprintf("Error in call to API function \"%v\": The given OAuth 2 access token is malformed.", r.RequestURI)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(resp))
-	}))
-}
-
-func stubUnshared() *httptest.Server {
-	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("{\"links\": [], \"has_more\": false}"))
-	}))
-}
-
-func stubShared() *httptest.Server {
-	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		resp := `
-		{
-			"links": [
-			{
-				".tag": "file",
-				"url": "https://www.dropbox.com/s/eqoo012hoa0wq7k/taylor%20bat%20focused.gif?dl=0",
-				"id": "id:tKL3Db9bgnoAAAAAAAAZnA",
-				"name": "taylor bat focused.gif",
-				"path_lower": "/gifs/taylor swift/lwymmd/taylor bat focused.gif",
-				"link_permissions": {
-					"resolved_visibility": {
-						".tag": "public"
-					},
-					"requested_visibility": {
-						".tag": "public"
-					},
-					"can_revoke": true
-				},
-				"client_modified": "2017-09-01T15:37:19Z",
-				"server_modified": "2017-12-01T16:37:11Z",
-				"rev": "5d050301f24e",
-				"size": 2078402
-			}
-			],
-			"has_more": false
-		}
-		`
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(resp))
-	}))
-}
-
 var host = "https://example-api.com"
 var version = 3
 var client = Client{
@@ -88,7 +39,7 @@ func TestExistsWithLinks(t *testing.T) {
 	c.Host = apiStub.URL
 	ok, url, _ := c.exists("gifs/def.gif")
 	assert.True(t, ok)
-	assert.Equal(t, "xxx", url)
+	assert.Equal(t, "https://www.dropbox.com/s/dropbox-hash/file%20name%201.gif", url)
 }
 
 func TestNewClient(t *testing.T) {
@@ -150,4 +101,53 @@ func TestNil(t *testing.T) {
 	// assert for nil - good for error-checking
 	assert.Nil(nil)
 	assert.NotNil(1)
+}
+
+func stubInvalidAuth() *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resp := fmt.Sprintf("Error in call to API function \"%v\": The given OAuth 2 access token is malformed.", r.RequestURI)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(resp))
+	}))
+}
+
+func stubUnshared() *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("{\"links\": [], \"has_more\": false}"))
+	}))
+}
+
+func stubShared() *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resp := `
+		{
+			"links": [
+			{
+				".tag": "file",
+				"url": "https://www.dropbox.com/s/dropbox-hash/file%20name%201.gif?dl=0",
+				"id": "id:DROPBOX_ID",
+				"name": "file name 1.gif",
+				"path_lower": "/gifs/examples/funny/file name 1.gif",
+				"link_permissions": {
+					"resolved_visibility": {
+						".tag": "public"
+					},
+					"requested_visibility": {
+						".tag": "public"
+					},
+					"can_revoke": true
+				},
+				"client_modified": "2017-09-01T15:37:19Z",
+				"server_modified": "2017-12-01T16:37:11Z",
+				"rev": "5d050301f24e",
+				"size": 2078402
+			}
+			],
+			"has_more": false
+		}
+		`
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(resp))
+	}))
 }
