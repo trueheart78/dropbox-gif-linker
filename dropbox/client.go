@@ -93,14 +93,14 @@ func (c Client) exists(filename string) (ok bool, url string, err error) {
 		return
 	}
 
-	var rawx []byte
-	var x existsResponse
-	rawx, err = ioutil.ReadAll(result.Body)
+	var rawBody []byte
+	var exists existsResponse
+	rawBody, err = ioutil.ReadAll(result.Body)
 	if err == nil {
-		json.Unmarshal(rawx, &x)
-		if len(x.Links) > 0 {
+		json.Unmarshal(rawBody, &exists)
+		if len(exists.Links) > 0 {
 			ok = true
-			url = x.Links[0].directLink()
+			url = exists.Links[0].directLink()
 		}
 	}
 	result.Body.Close()
