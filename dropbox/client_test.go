@@ -204,7 +204,7 @@ func creationExistsResponse() string {
 	{
 	   "error_summary": "shared_link_already_exists/..",
 	   "error": {
-	       ".tag": "shared_link_already_exists"
+			".tag": "shared_link_already_exists"
 	   }
 	}
 	`
@@ -219,8 +219,8 @@ func creationFailsResponse() string {
         ".tag": "path",
         "path": {
             ".tag": "not_found"
-	        }
-   		}
+			}
+		}
 	}
 	`
 }
