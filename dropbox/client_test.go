@@ -129,13 +129,27 @@ func stubShared(filePath string) *httptest.Server {
 	}))
 }
 
+func stubCreationFailure() *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("{\"links\": [], \"has_more\": false}"))
+	}))
+}
+
+func stubCreationSuccess() *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("{\"links\": [], \"has_more\": false}"))
+	}))
+}
+
 func craftExistingResponse(filePath string) string {
 	basename := path.Base(filePath)
 	basenameEscaped := url.QueryEscape(basename)
-	existingResponse := existingResponse()
-	existingResponse = strings.Replace(existingResponse, "URL_BASENAME", basenameEscaped, 1)
-	existingResponse = strings.Replace(existingResponse, "PATH_LOWER", filePath, 1)
-	return existingResponse
+	response := existingResponse()
+	response = strings.Replace(response, "URL_BASENAME", basenameEscaped, 1)
+	response = strings.Replace(response, "PATH_LOWER", filePath, 1)
+	return response
 }
 
 func existingResponse() string {

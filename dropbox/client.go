@@ -29,30 +29,33 @@ type settingPayload struct {
 }
 
 type existsResponse struct {
-	Links   []existingLink `json:"links"`
-	HasMore bool           `json:"has_more"`
+	Links   []Link `json:"links"`
+	HasMore bool   `json:"has_more"`
 }
 
-type existingLink struct {
+// Link is the data that is provided from the Dropbox API
+type Link struct {
 	Tag            string          `json:".tag"`
 	URL            string          `json:"url"`
 	ID             string          `json:"id"`
 	Name           string          `json:"name"`
 	Path           string          `json:"path_lower"`
-	Permissions    linkPermissions `json:"link_permissions"`
+	Permissions    LinkPermissions `json:"link_permissions"`
 	ClientModified string          `json:"client_modified"`
 	ServerModified string          `json:"server_modified"`
 	Revision       string          `json:"rev"`
 	FileSize       int             `json:"size"`
 }
 
-type linkPermissions struct {
-	ResolvedVisibility  linkTag `json:"resolved_visibility"`
-	RequestedVisibility linkTag `json:"requested_visibility"`
+// LinkPermissions are the permissions that Dropbox as assigned
+type LinkPermissions struct {
+	ResolvedVisibility  LinkTag `json:"resolved_visibility"`
+	RequestedVisibility LinkTag `json:"requested_visibility"`
 	CanRevoke           bool    `json:"can_revoke"`
 }
 
-type linkTag struct {
+// LinkTag is a tag assgined to a link
+type LinkTag struct {
 	Tag string `json:".tag"`
 }
 
@@ -100,17 +103,22 @@ func (c Client) exists(filename string) (ok bool, url string, err error) {
 		json.Unmarshal(rawBody, &exists)
 		if len(exists.Links) > 0 {
 			ok = true
-			url = exists.Links[0].directLink()
+			url = exists.Links[0].DirectLink()
 		}
 	}
 	result.Body.Close()
 	return
 }
 
+func (c Client) create(filename string) (ok bool, err error) {
+	return
+}
+
+// DirectLink returns the embeddable string
 // changes the host and removes the RawQuery to provide the correct URL
 // https://dl.dropboxusercontent.com/s/eqoo012hoa0wq7k/taylor%20bat%20focused.gif
 // https://www.dropbox.com/s/eqoo012hoa0wq7k/taylor%20bat%20focused.gif?dl=0
-func (e existingLink) directLink() string {
+func (e Link) DirectLink() string {
 	u, err := url.Parse(e.URL)
 	if err != nil {
 		panic(err)
