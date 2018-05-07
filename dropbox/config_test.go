@@ -86,30 +86,31 @@ func TestGifDirFix(t *testing.T) {
 func TestValidConfig(t *testing.T) {
 	assert := assert.New(t)
 
-	d := createFromConfig(validConfigFilename)
+	d, derr := createFromConfig(validConfigFilename)
 	ok, err := d.valid()
+	assert.Nil(derr)
 	assert.True(ok)
 	assert.Nil(err)
 
-	d = createFromConfig(invalidPathConfigFilename)
+	d, derr = createFromConfig(invalidPathConfigFilename)
 	ok, err = d.valid()
 	assert.False(ok)
 	assert.NotNil(err)
 	assert.Equal("the dropbox_path should be \"/Dropbox/\" instead of \"Dropbox/\"", err.Error())
 
-	d = createFromConfig(invalidDirConfigFilename)
+	d, derr = createFromConfig(invalidDirConfigFilename)
 	ok, err = d.valid()
 	assert.False(ok)
 	assert.NotNil(err)
 	assert.Equal("the dropbox_gif_dir should be \"/gifs/\" instead of \"gifs/\"", err.Error())
 
-	d = createFromConfig(invalidDirConfigFilename)
+	d, derr = createFromConfig(invalidDirConfigFilename)
 	d.gifDirFix()
 	ok, err = d.valid()
 	assert.True(ok)
 	assert.Nil(err)
 
-	d = createFromConfig(emptyConfigFilename)
+	d, derr = createFromConfig(emptyConfigFilename)
 	ok, err = d.valid()
 	assert.False(ok)
 	assert.NotNil(err)

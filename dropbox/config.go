@@ -26,7 +26,10 @@ type Config struct {
 // NewConfig attempts to load an existing configuration
 func NewConfig() (d Config, err error) {
 	fullConfig := configPath(configFilename)
-	d = createFromConfig(fullConfig)
+	d, err = createFromConfig(fullConfig)
+	if err != nil {
+		return
+	}
 	d.gifDirFix()
 	ok, _ := d.valid()
 	if !ok {
@@ -74,10 +77,12 @@ func (c Config) valid() (ok bool, err error) {
 func (c *Config) load(configFilename string) (ok bool, err error) {
 	var raw []byte
 	raw, err = ioutil.ReadFile(configFilename)
-	if err == nil {
-		json.Unmarshal(raw, c)
-		ok = true
+	if err != nil {
+		c.Path = configFilename
+		return
 	}
+	json.Unmarshal(raw, c)
+	ok = true
 	c.Path = configFilename
 	if configExists(configFilename) {
 		c.Loaded = true
@@ -85,11 +90,10 @@ func (c *Config) load(configFilename string) (ok bool, err error) {
 	return
 }
 
-func createFromConfig(configFilename string) (dropbox Config) {
-	_, err := dropbox.load(configFilename)
+func createFromConfig(configFilename string) (dropbox Config, err error) {
+	_, err = dropbox.load(configFilename)
 	if err != nil {
-		panic(err)
-		os.Exit(1)
+		return
 	}
 	return
 }
