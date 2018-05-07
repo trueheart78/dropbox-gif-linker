@@ -219,8 +219,8 @@ func creationFailsResponse() string {
         ".tag": "path",
         "path": {
             ".tag": "not_found"
-        }
-    }
+	        }
+   		}
 	}
 	`
 }
