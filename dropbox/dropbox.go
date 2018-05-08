@@ -30,10 +30,10 @@ type Config struct {
 type Client struct {
 	Host    string
 	Version int
-	Config  clientConfig
+	Config  configInterface
 }
 
-type clientConfig interface {
+type configInterface interface {
 	FullPath() string
 	GifsPath() string
 	Token() string
@@ -92,19 +92,34 @@ func NewConfig() (d Config, err error) {
 		return
 	}
 	d.gifDirFix()
-	ok, _ := d.Valid()
-	if !ok {
+	if !d.Valid() {
 		err = fmt.Errorf("please validate the %v file. See README for details", fullConfig)
 	}
 	return
 }
 
-// NewClient creates a new Client for interacting with Dropbox
-func NewClient(config clientConfig) (c Client) {
+// DefaultClient returns the client with the default config
+func DefaultClient() (c Client, err error) {
 	c.Host = "https://api.dropboxapi.com"
 	c.Version = 2
-	c.Config = config
+	var d Config
+	d, err = NewConfig()
+	if err != nil {
+		return
+	}
+	c.setConfig(&d)
 	return
+}
+
+func newClient(config configInterface) (c Client) {
+	c.Host = "https://api.dropboxapi.com"
+	c.Version = 2
+	c.setConfig(config)
+	return
+}
+
+func (c *Client) setConfig(config configInterface) {
+	c.Config = config
 }
 
 func (c *Config) gifDirFix() {
@@ -115,8 +130,7 @@ func (c *Config) gifDirFix() {
 
 // FullPath provides the full dropbox & gifs path
 func (c Config) FullPath() string {
-	ok, _ := c.Valid()
-	if ok {
+	if c.Valid() {
 		return filepath.Join(c.DropboxPath, c.GifDir)
 	}
 	return ""
@@ -124,8 +138,7 @@ func (c Config) FullPath() string {
 
 // GifsPath provides the full dropbox & gifs path
 func (c Config) GifsPath() string {
-	ok, _ := c.Valid()
-	if ok {
+	if c.Valid() {
 		return c.GifDir
 	}
 	return ""
@@ -133,15 +146,19 @@ func (c Config) GifsPath() string {
 
 // Token returns the api token for use in API calls
 func (c Config) Token() string {
-	ok, _ := c.Valid()
-	if ok {
+	if c.Valid() {
 		return c.APIToken
 	}
 	return ""
 }
 
 // Valid returns whether the config is valid
-func (c Config) Valid() (ok bool, err error) {
+func (c Config) Valid() (ok bool) {
+	ok, _ = c.validate()
+	return
+}
+
+func (c Config) validate() (ok bool, err error) {
 	if !c.Loaded {
 		err = errors.New("the config has yet to be loaded")
 		return

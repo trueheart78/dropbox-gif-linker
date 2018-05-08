@@ -11,15 +11,16 @@ import (
 	"github.com/trueheart78/dropbox-gif-linker/messages"
 )
 
-var dropboxConfig dropbox.Config
+var dropboxClient dropbox.Client
 
 func init() {
-	dropboxConfig, err := dropbox.NewConfig()
+	var err error
+	dropboxClient, err = dropbox.DefaultClient()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	fmt.Println(dropboxConfig.FullPath())
+
 	fmt.Println(messages.Welcome())
 }
 
