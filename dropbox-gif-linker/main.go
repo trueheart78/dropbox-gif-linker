@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/trueheart78/dropbox-gif-linker/commands"
+	"github.com/trueheart78/dropbox-gif-linker/data"
 	"github.com/trueheart78/dropbox-gif-linker/dropbox"
 	"github.com/trueheart78/dropbox-gif-linker/messages"
 )
@@ -26,8 +27,10 @@ func init() {
 
 func main() {
 	var input string
+	var err error
 	mode := "url"
 	reader := bufio.NewReader(os.Stdin)
+	handler := data.NewHandler()
 	for {
 		fmt.Println(messages.AwaitingInput(mode))
 		input, _ = reader.ReadString('\n')
@@ -43,6 +46,11 @@ func main() {
 			fmt.Println(messages.ModeShift("md"))
 		} else {
 			fmt.Printf("You entered: %v\n", input)
+			_, err = handler.Clean(input)
+			if err != nil {
+				fmt.Printf("Woops! %v", err.Error())
+				continue
+			}
 		}
 	}
 }
