@@ -99,16 +99,22 @@ func (c Client) exists(filename string) (link Link, err error) {
 	var rawBody []byte
 	var exists existsResponse
 	rawBody, err = ioutil.ReadAll(result.Body)
+	defer result.Body.Close()
 	if err == nil {
 		json.Unmarshal(rawBody, &exists)
 		if len(exists.Links) > 0 {
-			link = exists.Links[0]
+			for _, l := range exists.Links {
+				if l.Path == filename {
+					link = l
+					return
+				}
+			}
+			err = fmt.Errorf("no existing link for %v", filename)
 		} else {
 			err = fmt.Errorf("no existing link for %v", filename)
 		}
 
 	}
-	result.Body.Close()
 	return
 }
 

@@ -45,6 +45,23 @@ func TestExistsWithLinks(t *testing.T) {
 	assert.Equal(t, "https://dl.dropboxusercontent.com/s/DROPBOX_HASH/file+name+1.gif", url.DirectLink())
 }
 
+func TestExistsWithMultipleLinks(t *testing.T) {
+	c := NewClient()
+	apiStub := stubSharedMultiple("/gifs/file name 1.gif")
+	c.Host = apiStub.URL
+	url, err := c.exists("/gifs/file name 1.gif")
+	assert.Nil(t, err)
+	assert.Equal(t, "https://dl.dropboxusercontent.com/s/DROPBOX_HASH/file+name+1.gif", url.DirectLink())
+}
+
+func TestExistsWithMultipleLinksNoMatch(t *testing.T) {
+	c := NewClient()
+	apiStub := stubSharedMultipleNoMatch()
+	c.Host = apiStub.URL
+	_, err := c.exists(missingFile)
+	assert.Equal(t, fmt.Sprintf("no existing link for %v", missingFile), err.Error())
+}
+
 func TestNewClient(t *testing.T) {
 	c := NewClient()
 	assert.Equal(t, "https://api.dropboxapi.com", c.Host)
@@ -127,6 +144,21 @@ func stubShared(filePath string) *httptest.Server {
 	}))
 }
 
+func stubSharedMultiple(filePath string) *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resp := craftExistingResponseMultiple(filePath)
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(resp))
+	}))
+}
+
+func stubSharedMultipleNoMatch() *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(existingResponseMultipleNoMatch()))
+	}))
+}
+
 func stubCreationFailure() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusConflict)
@@ -153,6 +185,9 @@ func craftExistingResponse(filePath string) string {
 	return craftResponse(existingResponse(), filePath)
 }
 
+func craftExistingResponseMultiple(filePath string) string {
+	return craftResponse(existingResponseMultiple(), filePath)
+}
 func craftCreationResponse(filePath string) string {
 	return craftResponse(creationValidResponse(), filePath)
 }
@@ -197,11 +232,26 @@ func existingResponse() string {
 	}
 	`
 }
-
 func existingResponseMultiple() string {
 	return `
 	{
     "links": [
+		{
+            ".tag": "folder",
+            "url": "https://www.dropbox.com/sh/skm3nfeqlxb1ekw/AAB6wMgH5yJjFCOvbiRRHVZqa?dl=0",
+            "id": "id:DROPBOX_ID_OTHER",
+            "name": "gifs",
+            "path_lower": "/gifs",
+            "link_permissions": {
+                "resolved_visibility": {
+                    ".tag": "public"
+                },
+                "requested_visibility": {
+                    ".tag": "public"
+                },
+                "can_revoke": true
+            }
+        },
         {
             ".tag": "file",
 			"url": "https://www.dropbox.com/s/DROPBOX_HASH/URL_BASENAME?dl=0",
@@ -221,6 +271,48 @@ func existingResponseMultiple() string {
             "server_modified": "2017-12-01T16:37:11Z",
             "rev": "5d050301f24e",
             "size": 2078402
+        },
+        {
+            ".tag": "folder",
+            "url": "https://www.dropbox.com/sh/skm3nfeqlxb1ekw/AAB6wMgH5yJjFCOvbiRRHVZqa?dl=0",
+            "id": "id:DROPBOX_ID_OTHER",
+            "name": "gifs",
+            "path_lower": "/gifs",
+            "link_permissions": {
+                "resolved_visibility": {
+                    ".tag": "public"
+                },
+                "requested_visibility": {
+                    ".tag": "public"
+                },
+                "can_revoke": true
+            }
+        }
+    ],
+    "has_more": false
+	}
+	`
+}
+
+func existingResponseMultipleNoMatch() string {
+	return `
+	{
+    "links": [
+		{
+            ".tag": "folder",
+            "url": "https://www.dropbox.com/sh/skm3nfeqlxb1ekw/AAB6wMgH5yJjFCOvbiRRHVZqa?dl=0",
+            "id": "id:DROPBOX_ID_OTHER",
+            "name": "gifs",
+            "path_lower": "/gifs",
+            "link_permissions": {
+                "resolved_visibility": {
+                    ".tag": "public"
+                },
+                "requested_visibility": {
+                    ".tag": "public"
+                },
+                "can_revoke": true
+            }
         },
         {
             ".tag": "folder",
