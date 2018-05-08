@@ -13,6 +13,7 @@ import (
 )
 
 var missingFile = "gifs/def.gif"
+var existingFile = "/gifs/file name 1.gif"
 var host = "https://example-api.com"
 var version = 3
 var client = Client{
@@ -38,18 +39,18 @@ func TestExistsWithNoLinks(t *testing.T) {
 
 func TestExistsWithLinks(t *testing.T) {
 	c := NewClient()
-	apiStub := stubShared("/gifs/file name 1.gif")
+	apiStub := stubShared(existingFile)
 	c.Host = apiStub.URL
-	url, err := c.exists("/gifs/file name 1.gif")
+	url, err := c.exists(existingFile)
 	assert.Nil(t, err)
 	assert.Equal(t, "https://dl.dropboxusercontent.com/s/DROPBOX_HASH/file+name+1.gif", url.DirectLink())
 }
 
 func TestExistsWithMultipleLinks(t *testing.T) {
 	c := NewClient()
-	apiStub := stubSharedMultiple("/gifs/file name 1.gif")
+	apiStub := stubSharedMultiple(existingFile)
 	c.Host = apiStub.URL
-	url, err := c.exists("/gifs/file name 1.gif")
+	url, err := c.exists(existingFile)
 	assert.Nil(t, err)
 	assert.Equal(t, "https://dl.dropboxusercontent.com/s/DROPBOX_HASH/file+name+1.gif", url.DirectLink())
 }
