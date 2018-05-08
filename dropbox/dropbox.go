@@ -229,6 +229,19 @@ func (c Client) basicRequest(fullURL string, payload bytes.Buffer) (result *http
 	return http.DefaultClient.Do(request)
 }
 
+// CreateLink handles the filename and returns the Link object
+func (c Client) CreateLink(filename string) (link Link, err error) {
+	link, err = c.exists(filename)
+	if err != nil {
+		if strings.HasPrefix(err.Error(), "no existing link") {
+			err = nil
+			link, err = c.create(filename)
+		}
+		return
+	}
+	return
+}
+
 func (c Client) exists(filename string) (link Link, err error) {
 	if !c.valid() {
 		err = errors.New("client is not valid")

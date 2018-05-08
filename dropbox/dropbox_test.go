@@ -177,6 +177,18 @@ func TestClientFixFilename(t *testing.T) {
 	assert.Equal(t, "/gifs/gifs/sample/hello/sample.gif", fixedFilename)
 }
 
+func TestClientCreateLink(t *testing.T) {
+	c := newClient(validConfig)
+	apiStub := stubInvalidAuth()
+	c.Host = apiStub.URL
+
+	// TODO: write some tests!
+	// 1. when it exists
+	// 2. when it does not exist and creation succeeds
+	// 3. when it does not exist and creation fails
+	// 4. when the dropbox api returns a 409 on exist check
+}
+
 func TestClientCreationWithInvalidAuthServer(t *testing.T) {
 	c := newClient(validConfig)
 	apiStub := stubInvalidAuth()
