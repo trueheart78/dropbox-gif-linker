@@ -15,6 +15,7 @@ import (
 type testConfig struct {
 	fullPath string
 	apiToken string
+	valid    bool
 }
 
 func (t testConfig) FullPath() string {
@@ -22,6 +23,9 @@ func (t testConfig) FullPath() string {
 }
 func (t testConfig) Token() string {
 	return t.apiToken
+}
+func (t testConfig) Valid() bool {
+	return t.valid
 }
 
 var missingFile = "gifs/def.gif"
@@ -34,10 +38,11 @@ var client = Client{
 }
 var apiToken = "xxx"
 var fullPath = "xxxx/xxx"
-var basicConfig = testConfig{fullPath, apiToken}
+var validConfig = testConfig{fullPath, apiToken, true}
+var invalidConfig = testConfig{fullPath, apiToken, false}
 
 func TestCreationWithInvalidAuthServer(t *testing.T) {
-	c := NewClient(basicConfig)
+	c := NewClient(validConfig)
 	apiStub := stubInvalidAuth()
 	c.Host = apiStub.URL
 	_, err := c.create(missingFile)
@@ -45,7 +50,7 @@ func TestCreationWithInvalidAuthServer(t *testing.T) {
 }
 
 func TestExistsWithInvalidAuthServer(t *testing.T) {
-	c := NewClient(basicConfig)
+	c := NewClient(validConfig)
 	apiStub := stubInvalidAuth()
 	c.Host = apiStub.URL
 	_, err := c.exists(missingFile)
@@ -53,7 +58,7 @@ func TestExistsWithInvalidAuthServer(t *testing.T) {
 }
 
 func TestCreationSuccess(t *testing.T) {
-	c := NewClient(basicConfig)
+	c := NewClient(validConfig)
 	apiStub := stubCreationSuccess(existingFile)
 	c.Host = apiStub.URL
 	url, err := c.create(existingFile)
@@ -62,7 +67,7 @@ func TestCreationSuccess(t *testing.T) {
 }
 
 func TestCreationExists(t *testing.T) {
-	c := NewClient(basicConfig)
+	c := NewClient(validConfig)
 	apiStub := stubCreationExists()
 	c.Host = apiStub.URL
 	_, err := c.create(existingFile)
@@ -70,7 +75,7 @@ func TestCreationExists(t *testing.T) {
 }
 
 func TestCreationFailure(t *testing.T) {
-	c := NewClient(basicConfig)
+	c := NewClient(validConfig)
 	apiStub := stubCreationFailure()
 	c.Host = apiStub.URL
 	_, err := c.create(missingFile)
@@ -78,7 +83,7 @@ func TestCreationFailure(t *testing.T) {
 }
 
 func TestExistsWithNoLinks(t *testing.T) {
-	c := NewClient(basicConfig)
+	c := NewClient(validConfig)
 	apiStub := stubUnshared()
 	c.Host = apiStub.URL
 	_, err := c.exists(missingFile)
@@ -86,7 +91,7 @@ func TestExistsWithNoLinks(t *testing.T) {
 }
 
 func TestExistsWithLinks(t *testing.T) {
-	c := NewClient(basicConfig)
+	c := NewClient(validConfig)
 	apiStub := stubShared(existingFile)
 	c.Host = apiStub.URL
 	url, err := c.exists(existingFile)
@@ -95,7 +100,7 @@ func TestExistsWithLinks(t *testing.T) {
 }
 
 func TestExistsWithMultipleLinks(t *testing.T) {
-	c := NewClient(basicConfig)
+	c := NewClient(validConfig)
 	apiStub := stubSharedMultiple(existingFile)
 	c.Host = apiStub.URL
 	url, err := c.exists(existingFile)
@@ -104,7 +109,7 @@ func TestExistsWithMultipleLinks(t *testing.T) {
 }
 
 func TestExistsWithMultipleLinksNoMatch(t *testing.T) {
-	c := NewClient(basicConfig)
+	c := NewClient(validConfig)
 	apiStub := stubSharedMultipleNoMatch()
 	c.Host = apiStub.URL
 	_, err := c.exists(missingFile)
@@ -112,13 +117,13 @@ func TestExistsWithMultipleLinksNoMatch(t *testing.T) {
 }
 
 func TestNewClient(t *testing.T) {
-	c := NewClient(basicConfig)
+	c := NewClient(validConfig)
 	assert.Equal(t, "https://api.dropboxapi.com", c.Host)
 	assert.Equal(t, 2, c.Version)
 }
 
 func TestValidClient(t *testing.T) {
-	c := Client{}
+	c := Client{Config: invalidConfig}
 
 	assert.False(t, c.valid())
 
@@ -126,6 +131,9 @@ func TestValidClient(t *testing.T) {
 	assert.False(t, c.valid())
 
 	c.Version = 1
+	assert.False(t, c.valid())
+
+	c.Config = validConfig
 	assert.True(t, c.valid())
 }
 

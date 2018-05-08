@@ -20,6 +20,7 @@ type Client struct {
 type clientConfig interface {
 	FullPath() string
 	Token() string
+	Valid() bool
 }
 
 type existingPayload struct {
@@ -75,7 +76,7 @@ func NewClient(config clientConfig) (c Client) {
 }
 
 func (c Client) valid() bool {
-	if c.Host == "" || c.Version == 0 {
+	if !c.Config.Valid() || c.Host == "" || c.Version == 0 {
 		return false
 	}
 	return true

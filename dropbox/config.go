@@ -31,7 +31,7 @@ func NewConfig() (d Config, err error) {
 		return
 	}
 	d.gifDirFix()
-	ok, _ := d.valid()
+	ok, _ := d.Valid()
 	if !ok {
 		err = fmt.Errorf("please validate the %v file. See README for details", fullConfig)
 	}
@@ -46,7 +46,7 @@ func (c *Config) gifDirFix() {
 
 // FullPath provides the full dropbox & gifs path
 func (c Config) FullPath() string {
-	ok, _ := c.valid()
+	ok, _ := c.Valid()
 	if ok {
 		return filepath.Join(c.DropboxPath, c.GifDir)
 	}
@@ -55,14 +55,14 @@ func (c Config) FullPath() string {
 
 // Token returns the api token for use in API calls
 func (c Config) Token() string {
-	ok, _ := c.valid()
+	ok, _ := c.Valid()
 	if ok {
 		return c.APIToken
 	}
 	return ""
 }
 
-func (c Config) valid() (ok bool, err error) {
+func (c Config) Valid() (ok bool, err error) {
 	if !c.Loaded {
 		err = errors.New("the config has yet to be loaded")
 		return

@@ -87,31 +87,31 @@ func TestValidConfig(t *testing.T) {
 	assert := assert.New(t)
 
 	d, derr := createFromConfig(validConfigFilename)
-	ok, err := d.valid()
+	ok, err := d.Valid()
 	assert.Nil(derr)
 	assert.True(ok)
 	assert.Nil(err)
 
 	d, derr = createFromConfig(invalidPathConfigFilename)
-	ok, err = d.valid()
+	ok, err = d.Valid()
 	assert.False(ok)
 	assert.NotNil(err)
 	assert.Equal("the dropbox_path should be \"/Dropbox/\" instead of \"Dropbox/\"", err.Error())
 
 	d, derr = createFromConfig(invalidDirConfigFilename)
-	ok, err = d.valid()
+	ok, err = d.Valid()
 	assert.False(ok)
 	assert.NotNil(err)
 	assert.Equal("the dropbox_gif_dir should be \"/gifs/\" instead of \"gifs/\"", err.Error())
 
 	d, derr = createFromConfig(invalidDirConfigFilename)
 	d.gifDirFix()
-	ok, err = d.valid()
+	ok, err = d.Valid()
 	assert.True(ok)
 	assert.Nil(err)
 
 	d, derr = createFromConfig(emptyConfigFilename)
-	ok, err = d.valid()
+	ok, err = d.Valid()
 	assert.False(ok)
 	assert.NotNil(err)
 }
