@@ -21,6 +21,14 @@ var client = Client{
 	Version: version,
 }
 
+func TestCreationWithInvalidAuthServer(t *testing.T) {
+	c := NewClient()
+	apiStub := stubInvalidAuth()
+	c.Host = apiStub.URL
+	_, err := c.create(missingFile)
+	assert.Equal(t, "dropbox returned a 400", err.Error())
+}
+
 func TestExistsWithInvalidAuthServer(t *testing.T) {
 	c := NewClient()
 	apiStub := stubInvalidAuth()
@@ -36,6 +44,14 @@ func TestCreationSuccess(t *testing.T) {
 	url, err := c.create(existingFile)
 	assert.Nil(t, err)
 	assert.Equal(t, "https://dl.dropboxusercontent.com/s/DROPBOX_HASH/file+name+1.gif", url.DirectLink())
+}
+
+func TestCreationExists(t *testing.T) {
+	c := NewClient()
+	apiStub := stubCreationExists()
+	c.Host = apiStub.URL
+	_, err := c.create(existingFile)
+	assert.Equal(t, "dropbox returned a 409", err.Error())
 }
 
 func TestCreationFailure(t *testing.T) {
