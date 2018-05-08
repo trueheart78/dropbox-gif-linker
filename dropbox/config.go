@@ -53,6 +53,15 @@ func (c Config) FullPath() string {
 	return ""
 }
 
+// Token returns the api token for use in API calls
+func (c Config) Token() string {
+	ok, _ := c.valid()
+	if ok {
+		return c.APIToken
+	}
+	return ""
+}
+
 func (c Config) valid() (ok bool, err error) {
 	if !c.Loaded {
 		err = errors.New("the config has yet to be loaded")

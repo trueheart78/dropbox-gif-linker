@@ -14,6 +14,12 @@ import (
 type Client struct {
 	Host    string
 	Version int
+	Config  clientConfig
+}
+
+type clientConfig interface {
+	FullPath() string
+	Token() string
 }
 
 type existingPayload struct {
@@ -61,9 +67,10 @@ type LinkTag struct {
 }
 
 // NewClient creates a new Client for interacting with Dropbox
-func NewClient() (c Client) {
+func NewClient(config clientConfig) (c Client) {
 	c.Host = "https://api.dropboxapi.com"
 	c.Version = 2
+	c.Config = config
 	return
 }
 
@@ -74,7 +81,7 @@ func (c Client) valid() bool {
 	return true
 }
 
-func basicRequest(fullURL string, payload bytes.Buffer) (result *http.Response, err error) {
+func (c Client) basicRequest(fullURL string, payload bytes.Buffer) (result *http.Response, err error) {
 	request, err := http.NewRequest(http.MethodPost, fullURL, &payload)
 	if err != nil {
 		panic(err)
@@ -93,7 +100,7 @@ func (c Client) exists(filename string) (link Link, err error) {
 
 	payload := c.existingPayload(filename)
 	fullURL := c.existingURL()
-	result, err := basicRequest(fullURL, payload)
+	result, err := c.basicRequest(fullURL, payload)
 
 	if err != nil {
 		return
@@ -132,7 +139,7 @@ func (c Client) create(filename string) (link Link, err error) {
 
 	payload := c.creationPayload(filename)
 	fullURL := c.creationURL()
-	result, err := basicRequest(fullURL, payload)
+	result, err := c.basicRequest(fullURL, payload)
 
 	if err != nil {
 		return
