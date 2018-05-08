@@ -107,19 +107,15 @@ func DefaultClient() (c Client, err error) {
 	if err != nil {
 		return
 	}
-	c.setConfig(&d)
+	c.Config = &d
 	return
 }
 
 func newClient(config configInterface) (c Client) {
 	c.Host = "https://api.dropboxapi.com"
 	c.Version = 2
-	c.setConfig(config)
-	return
-}
-
-func (c *Client) setConfig(config configInterface) {
 	c.Config = config
+	return
 }
 
 func (c *Config) gifDirFix() {
