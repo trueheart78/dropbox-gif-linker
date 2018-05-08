@@ -222,6 +222,7 @@ func (c Client) exists(filename string) (link Link, err error) {
 		return
 	}
 
+	filename = c.fixFilename(filename)
 	payload := c.existingPayload(filename)
 	fullURL := c.existingURL()
 	result, err := c.basicRequest(fullURL, payload)
@@ -261,6 +262,7 @@ func (c Client) create(filename string) (link Link, err error) {
 		return
 	}
 
+	filename = c.fixFilename(filename)
 	payload := c.creationPayload(filename)
 	fullURL := c.creationURL()
 	result, err := c.basicRequest(fullURL, payload)
@@ -305,9 +307,6 @@ func (c Client) fixFilename(filename string) string {
 }
 
 func (c Client) existingPayload(filename string) (buf bytes.Buffer) {
-	//fmt.Println("before:", filename)
-	//filename = c.fixFilename(filename)
-	//fmt.Println("after:", filename)
 	payload := existingPayload{filename}
 	err := json.NewEncoder(&buf).Encode(&payload)
 	if err != nil {
@@ -317,7 +316,6 @@ func (c Client) existingPayload(filename string) (buf bytes.Buffer) {
 }
 
 func (c Client) creationPayload(filename string) (buf bytes.Buffer) {
-	//filename = c.fixFilename(filename)
 	payload := creationPayload{filename, c.settingPayload()}
 	err := json.NewEncoder(&buf).Encode(&payload)
 	if err != nil {

@@ -60,19 +60,16 @@ func fixturePath(filename string) string {
 }
 
 func TestConfigPath(t *testing.T) {
-	assert := assert.New(t)
-
 	fullConfigPath := configPath(".dgl.json")
-	assert.True(strings.HasSuffix(fullConfigPath, configFilename))
-	assert.False(strings.HasPrefix(fullConfigPath, configFilename))
+
+	assert.True(t, strings.HasSuffix(fullConfigPath, configFilename))
+	assert.False(t, strings.HasPrefix(fullConfigPath, configFilename))
 }
 
 func TestConfigExists(t *testing.T) {
-	assert := assert.New(t)
-
-	assert.True(configExists(validConfigFilename))
-	assert.True(configExists(emptyConfigFilename))
-	assert.False(configExists(missingConfigFilename))
+	assert.True(t, configExists(validConfigFilename))
+	assert.True(t, configExists(emptyConfigFilename))
+	assert.False(t, configExists(missingConfigFilename))
 }
 
 func TestConfigLoad(t *testing.T) {
@@ -156,12 +153,12 @@ func TestClientFixFilename(t *testing.T) {
 	c := NewClient(validConfig)
 	originalFilename := "sample.gif"
 	fixedFilename := c.fixFilename(originalFilename)
-
+	// makes sure the basic file is in the gifs dropbox path
 	assert.Equal(t, "/gifs/sample.gif", fixedFilename)
 
 	originalFilename = "sample/hello/sample.gif"
 	fixedFilename = c.fixFilename(originalFilename)
-
+	// makes sure the full file is in the gifs dropbox path
 	assert.Equal(t, "/gifs/sample/hello/sample.gif", fixedFilename)
 
 	originalFilename = "/gifs/sample/hello/sample.gif"
@@ -315,6 +312,7 @@ func stubInvalidAuth() *httptest.Server {
 
 func stubUnshared() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("{\"links\": [], \"has_more\": false}"))
 	}))
@@ -323,6 +321,7 @@ func stubUnshared() *httptest.Server {
 func stubShared(filePath string) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		resp := craftExistingResponse(filePath)
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(resp))
 	}))
@@ -331,6 +330,7 @@ func stubShared(filePath string) *httptest.Server {
 func stubSharedMultiple(filePath string) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		resp := craftExistingResponseMultiple(filePath)
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(resp))
 	}))
@@ -338,6 +338,7 @@ func stubSharedMultiple(filePath string) *httptest.Server {
 
 func stubSharedMultipleNoMatch() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(existingResponseMultipleNoMatch()))
 	}))
@@ -345,6 +346,7 @@ func stubSharedMultipleNoMatch() *httptest.Server {
 
 func stubCreationFailure() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusConflict)
 		w.Write([]byte(creationFailsResponse()))
 	}))
@@ -352,6 +354,7 @@ func stubCreationFailure() *httptest.Server {
 
 func stubCreationExists() *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusConflict)
 		w.Write([]byte(creationExistsResponse()))
 	}))
@@ -360,6 +363,7 @@ func stubCreationExists() *httptest.Server {
 func stubCreationSuccess(filePath string) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		resp := craftCreationResponse(filePath)
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(resp))
 	}))
