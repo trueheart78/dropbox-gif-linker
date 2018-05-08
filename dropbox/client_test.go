@@ -42,7 +42,7 @@ func TestExistsWithLinks(t *testing.T) {
 	c.Host = apiStub.URL
 	url, err := c.exists("/gifs/file name 1.gif")
 	assert.Nil(t, err)
-	assert.Equal(t, "https://dl.dropboxusercontent.com/s/dropbox-hash/file+name+1.gif", url.DirectLink())
+	assert.Equal(t, "https://dl.dropboxusercontent.com/s/DROPBOX_HASH/file+name+1.gif", url.DirectLink())
 }
 
 func TestNewClient(t *testing.T) {
@@ -150,18 +150,18 @@ func stubCreationSuccess(filePath string) *httptest.Server {
 }
 
 func craftExistingResponse(filePath string) string {
-	basename := path.Base(filePath)
-	basenameEscaped := url.QueryEscape(basename)
-	response := existingResponse()
-	response = strings.Replace(response, "URL_BASENAME", basenameEscaped, 1)
-	response = strings.Replace(response, "PATH_LOWER", filePath, 1)
-	return response
+	return craftResponse(existingResponse(), filePath)
 }
 
 func craftCreationResponse(filePath string) string {
+	return craftResponse(creationValidResponse(), filePath)
+}
+
+func craftResponse(input string, filePath string) string {
 	basename := path.Base(filePath)
 	basenameEscaped := url.QueryEscape(basename)
-	response := creationValidResponse()
+	response := input
+	response = strings.Replace(response, "RAW_BASENAME", basename, 1)
 	response = strings.Replace(response, "URL_BASENAME", basenameEscaped, 1)
 	response = strings.Replace(response, "PATH_LOWER", filePath, 1)
 	return response
@@ -174,10 +174,10 @@ func existingResponse() string {
 		"links": [
 		{
 			".tag": "file",
-			"url": "https://www.dropbox.com/s/dropbox-hash/URL_BASENAME?dl=0",
+			"url": "https://www.dropbox.com/s/DROPBOX_HASH/URL_BASENAME?dl=0",
 			"id": "id:DROPBOX_ID",
-			"name": "file name 1.gif",
-			"path_lower": "/gifs/examples/funny/file name 1.gif",
+			"name": "RAW_BASENAME",
+			"path_lower": "PATH_LOWER",
 			"link_permissions": {
 				"resolved_visibility": {
 					".tag": "public"
@@ -194,6 +194,52 @@ func existingResponse() string {
 		}
 		],
 		"has_more": false
+	}
+	`
+}
+
+func existingResponseMultiple() string {
+	return `
+	{
+    "links": [
+        {
+            ".tag": "file",
+			"url": "https://www.dropbox.com/s/DROPBOX_HASH/URL_BASENAME?dl=0",
+			"id": "id:DROPBOX_ID",
+			"name": "RAW_BASENAME",
+			"path_lower": "PATH_LOWER",
+            "link_permissions": {
+                "resolved_visibility": {
+                    ".tag": "public"
+                },
+                "requested_visibility": {
+                    ".tag": "public"
+                },
+                "can_revoke": true
+            },
+            "client_modified": "2017-09-01T15:37:19Z",
+            "server_modified": "2017-12-01T16:37:11Z",
+            "rev": "5d050301f24e",
+            "size": 2078402
+        },
+        {
+            ".tag": "folder",
+            "url": "https://www.dropbox.com/sh/skm3nfeqlxb1ekw/AAB6wMgH5yJjFCOvbiRRHVZqa?dl=0",
+            "id": "id:DROPBOX_ID_OTHER",
+            "name": "gifs",
+            "path_lower": "/gifs",
+            "link_permissions": {
+                "resolved_visibility": {
+                    ".tag": "public"
+                },
+                "requested_visibility": {
+                    ".tag": "public"
+                },
+                "can_revoke": true
+            }
+        }
+    ],
+    "has_more": false
 	}
 	`
 }
@@ -230,10 +276,10 @@ func creationValidResponse() string {
 	return `
 	{
 		".tag": "file",
-		"url": "https://www.dropbox.com/s/dropbox-hash/URL_BASENAME?dl=0",
+		"url": "https://www.dropbox.com/s/DROPBOX_HASH/URL_BASENAME?dl=0",
 		"id": "id:DROPBOX_ID",
-		"name": "file name 1.gif",
-		"path_lower": "/gifs/examples/funny/file name 1.gif",
+		"name": "RAW_BASENAME",
+		"path_lower": "PATH_LOWER",
 		"link_permissions": {
 			"resolved_visibility": {
 				".tag": "public"
