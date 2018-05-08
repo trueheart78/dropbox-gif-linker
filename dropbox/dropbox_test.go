@@ -20,16 +20,18 @@ var invalidDirConfigFilename = fixturePath("invalid_dir")
 var emptyConfigFilename = fixturePath("empty")
 var missingConfigFilename = fixturePath("missing")
 
-var dropbox = Config{}
-
 type testConfig struct {
 	fullPath string
+	gifDir   string
 	apiToken string
 	valid    bool
 }
 
 func (t testConfig) FullPath() string {
 	return t.fullPath
+}
+func (t testConfig) GifsPath() string {
+	return t.gifDir
 }
 func (t testConfig) Token() string {
 	return t.apiToken
@@ -38,7 +40,7 @@ func (t testConfig) Valid() bool {
 	return t.valid
 }
 
-var missingFile = "gifs/def.gif"
+var missingFile = "/gifs/def.gif"
 var existingFile = "/gifs/file name 1.gif"
 var host = "https://example-api.com"
 var version = 3
@@ -48,8 +50,9 @@ var client = Client{
 }
 var apiToken = "xxx"
 var fullPath = "xxxx/xxx"
-var validConfig = testConfig{fullPath, apiToken, true}
-var invalidConfig = testConfig{fullPath, apiToken, false}
+var gifDir = "/gifs"
+var validConfig = testConfig{fullPath, gifDir, apiToken, true}
+var invalidConfig = testConfig{fullPath, gifDir, apiToken, false}
 
 func fixturePath(filename string) string {
 	workingDir, _ := os.Getwd()
@@ -72,7 +75,7 @@ func TestConfigExists(t *testing.T) {
 	assert.False(configExists(missingConfigFilename))
 }
 
-func TestLoad(t *testing.T) {
+func TestConfigLoad(t *testing.T) {
 	assert := assert.New(t)
 
 	// valid config
@@ -106,7 +109,7 @@ func TestLoad(t *testing.T) {
 	assert.False(d.Loaded)
 }
 
-func TestGifDirFix(t *testing.T) {
+func TestConfigGifDirFix(t *testing.T) {
 	assert := assert.New(t)
 
 	d := Config{GifDir: "example/"}
@@ -116,7 +119,7 @@ func TestGifDirFix(t *testing.T) {
 	assert.Equal("/example/", d.GifDir)
 }
 
-func TestValidConfig(t *testing.T) {
+func TestConfigValid(t *testing.T) {
 	assert := assert.New(t)
 
 	d, derr := createFromConfig(validConfigFilename)
@@ -149,7 +152,30 @@ func TestValidConfig(t *testing.T) {
 	assert.NotNil(err)
 }
 
-func TestCreationWithInvalidAuthServer(t *testing.T) {
+func TestClientFixFilename(t *testing.T) {
+	c := NewClient(validConfig)
+	originalFilename := "sample.gif"
+	fixedFilename := c.fixFilename(originalFilename)
+
+	assert.Equal(t, "/gifs/sample.gif", fixedFilename)
+
+	originalFilename = "sample/hello/sample.gif"
+	fixedFilename = c.fixFilename(originalFilename)
+
+	assert.Equal(t, "/gifs/sample/hello/sample.gif", fixedFilename)
+
+	originalFilename = "/gifs/sample/hello/sample.gif"
+	fixedFilename = c.fixFilename(originalFilename)
+	// doesn't change the original filename
+	assert.Equal(t, originalFilename, fixedFilename)
+
+	originalFilename = "gifs/sample/hello/sample.gif"
+	fixedFilename = c.fixFilename(originalFilename)
+	// double /gifs when gifs does not have a leading slash
+	assert.Equal(t, "/gifs/gifs/sample/hello/sample.gif", fixedFilename)
+}
+
+func TestClientCreationWithInvalidAuthServer(t *testing.T) {
 	c := NewClient(validConfig)
 	apiStub := stubInvalidAuth()
 	c.Host = apiStub.URL
@@ -157,7 +183,7 @@ func TestCreationWithInvalidAuthServer(t *testing.T) {
 	assert.Equal(t, "dropbox returned a 400", err.Error())
 }
 
-func TestExistsWithInvalidAuthServer(t *testing.T) {
+func TestClientExistsWithInvalidAuthServer(t *testing.T) {
 	c := NewClient(validConfig)
 	apiStub := stubInvalidAuth()
 	c.Host = apiStub.URL
@@ -165,7 +191,7 @@ func TestExistsWithInvalidAuthServer(t *testing.T) {
 	assert.Equal(t, "dropbox returned a 400", err.Error())
 }
 
-func TestCreationSuccess(t *testing.T) {
+func TestClientCreationSuccess(t *testing.T) {
 	c := NewClient(validConfig)
 	apiStub := stubCreationSuccess(existingFile)
 	c.Host = apiStub.URL
@@ -174,7 +200,7 @@ func TestCreationSuccess(t *testing.T) {
 	assert.Equal(t, "https://dl.dropboxusercontent.com/s/DROPBOX_HASH/file+name+1.gif", url.DirectLink())
 }
 
-func TestCreationExists(t *testing.T) {
+func TestClientCreationExists(t *testing.T) {
 	c := NewClient(validConfig)
 	apiStub := stubCreationExists()
 	c.Host = apiStub.URL
@@ -182,7 +208,7 @@ func TestCreationExists(t *testing.T) {
 	assert.Equal(t, "dropbox returned a 409", err.Error())
 }
 
-func TestCreationFailure(t *testing.T) {
+func TestClientCreationFailure(t *testing.T) {
 	c := NewClient(validConfig)
 	apiStub := stubCreationFailure()
 	c.Host = apiStub.URL
@@ -190,7 +216,7 @@ func TestCreationFailure(t *testing.T) {
 	assert.Equal(t, "dropbox returned a 409", err.Error())
 }
 
-func TestExistsWithNoLinks(t *testing.T) {
+func TestClientExistsWithNoLinks(t *testing.T) {
 	c := NewClient(validConfig)
 	apiStub := stubUnshared()
 	c.Host = apiStub.URL
@@ -198,7 +224,7 @@ func TestExistsWithNoLinks(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf("no existing link for %v", missingFile), err.Error())
 }
 
-func TestExistsWithLinks(t *testing.T) {
+func TestClientExistsWithLinks(t *testing.T) {
 	c := NewClient(validConfig)
 	apiStub := stubShared(existingFile)
 	c.Host = apiStub.URL
@@ -207,7 +233,7 @@ func TestExistsWithLinks(t *testing.T) {
 	assert.Equal(t, "https://dl.dropboxusercontent.com/s/DROPBOX_HASH/file+name+1.gif", url.DirectLink())
 }
 
-func TestExistsWithMultipleLinks(t *testing.T) {
+func TestClientExistsWithMultipleLinks(t *testing.T) {
 	c := NewClient(validConfig)
 	apiStub := stubSharedMultiple(existingFile)
 	c.Host = apiStub.URL
@@ -216,7 +242,7 @@ func TestExistsWithMultipleLinks(t *testing.T) {
 	assert.Equal(t, "https://dl.dropboxusercontent.com/s/DROPBOX_HASH/file+name+1.gif", url.DirectLink())
 }
 
-func TestExistsWithMultipleLinksNoMatch(t *testing.T) {
+func TestClientExistsWithMultipleLinksNoMatch(t *testing.T) {
 	c := NewClient(validConfig)
 	apiStub := stubSharedMultipleNoMatch()
 	c.Host = apiStub.URL
@@ -230,7 +256,7 @@ func TestNewClient(t *testing.T) {
 	assert.Equal(t, 2, c.Version)
 }
 
-func TestValidClient(t *testing.T) {
+func TestClientValidClient(t *testing.T) {
 	c := Client{Config: invalidConfig}
 
 	assert.False(t, c.valid())
@@ -245,45 +271,38 @@ func TestValidClient(t *testing.T) {
 	assert.True(t, c.valid())
 }
 
-func TestExistingPayload(t *testing.T) {
+func TestClientExistingPayload(t *testing.T) {
 	data := client.existingPayload(missingFile)
 	json := fmt.Sprintf("{\"path\":\"%v\"}\n", missingFile)
 	assert.Equal(t, json, data.String())
 }
 
-func TestCreationPayload(t *testing.T) {
+func TestClientCreationPayload(t *testing.T) {
 	data := client.creationPayload(missingFile)
 	json := fmt.Sprintf("{\"path\":\"%v\",\"settings\":{\"requested_visibility\":\"public\"}}\n", missingFile)
 	assert.Equal(t, json, data.String())
 }
 
-func TestExistingURL(t *testing.T) {
+func TestClientExistingURL(t *testing.T) {
 	url := fmt.Sprintf("%v/%d/%v", host, version, "sharing/list_shared_links")
 	assert.Equal(t, url, client.existingURL())
 }
 
-func TestCreationURL(t *testing.T) {
+func TestClientCreationURL(t *testing.T) {
 	url := fmt.Sprintf("%v/%d/%v", host, version, "sharing/create_shared_link_with_settings")
 	assert.Equal(t, url, client.creationURL())
 }
 
-func TestCreationPath(t *testing.T) {
+func TestClientCreationPath(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf("%d/sharing/create_shared_link_with_settings", client.Version), client.creationPath())
 }
 
-func TestExistingPath(t *testing.T) {
+func TestClientExistingPath(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf("%d/sharing/list_shared_links", client.Version), client.existingPath())
 }
 
-func TestApiURL(t *testing.T) {
+func TestClientApiURL(t *testing.T) {
 	assert.Equal(t, host, client.apiURL().String())
-}
-
-func TestNil(t *testing.T) {
-	assert := assert.New(t)
-	// assert for nil - good for error-checking
-	assert.Nil(nil)
-	assert.NotNil(1)
 }
 
 func stubInvalidAuth() *httptest.Server {

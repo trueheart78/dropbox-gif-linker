@@ -35,6 +35,7 @@ type Client struct {
 
 type clientConfig interface {
 	FullPath() string
+	GifsPath() string
 	Token() string
 	Valid() bool
 }
@@ -121,6 +122,15 @@ func (c Config) FullPath() string {
 	return ""
 }
 
+// GifsPath provides the full dropbox & gifs path
+func (c Config) GifsPath() string {
+	ok, _ := c.Valid()
+	if ok {
+		return c.GifDir
+	}
+	return ""
+}
+
 // Token returns the api token for use in API calls
 func (c Config) Token() string {
 	ok, _ := c.Valid()
@@ -130,6 +140,7 @@ func (c Config) Token() string {
 	return ""
 }
 
+// Valid returns whether the config is valid
 func (c Config) Valid() (ok bool, err error) {
 	if !c.Loaded {
 		err = errors.New("the config has yet to be loaded")
@@ -199,7 +210,7 @@ func (c Client) basicRequest(fullURL string, payload bytes.Buffer) (result *http
 	if err != nil {
 		panic(err)
 	}
-	request.Header.Set("Authorization", "API_TOKEN")
+	request.Header.Set("Authorization", fmt.Sprintf("Bearer %v", c.Config.Token()))
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("User-Agent", "Dropbox Gif Linker")
 	return http.DefaultClient.Do(request)
@@ -286,7 +297,17 @@ func (e Link) DirectLink() string {
 	return u.String()
 }
 
+func (c Client) fixFilename(filename string) string {
+	if !strings.HasPrefix(filename, c.Config.GifsPath()) {
+		return filepath.Join(c.Config.GifsPath(), filename)
+	}
+	return filename
+}
+
 func (c Client) existingPayload(filename string) (buf bytes.Buffer) {
+	//fmt.Println("before:", filename)
+	//filename = c.fixFilename(filename)
+	//fmt.Println("after:", filename)
 	payload := existingPayload{filename}
 	err := json.NewEncoder(&buf).Encode(&payload)
 	if err != nil {
@@ -296,6 +317,7 @@ func (c Client) existingPayload(filename string) (buf bytes.Buffer) {
 }
 
 func (c Client) creationPayload(filename string) (buf bytes.Buffer) {
+	//filename = c.fixFilename(filename)
 	payload := creationPayload{filename, c.settingPayload()}
 	err := json.NewEncoder(&buf).Encode(&payload)
 	if err != nil {
