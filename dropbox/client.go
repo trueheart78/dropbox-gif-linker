@@ -3,6 +3,7 @@ package dropbox
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -73,22 +74,28 @@ func (c Client) valid() bool {
 	return true
 }
 
-func (c Client) exists(filename string) (link Link, err error) {
-	if !c.valid() {
-		return
-	}
-	data := c.existingPayload(filename)
-	request, err := http.NewRequest(http.MethodPost, c.existingURL(), &data)
+func basicRequest(fullURL string, payload bytes.Buffer) (result *http.Response, err error) {
+	request, err := http.NewRequest(http.MethodPost, fullURL, &payload)
 	if err != nil {
 		panic(err)
 	}
 	request.Header.Set("Authorization", "API_TOKEN")
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("User-Agent", "Dropbox Gif Linker")
-	result, err := http.DefaultClient.Do(request)
+	return http.DefaultClient.Do(request)
+}
+
+func (c Client) exists(filename string) (link Link, err error) {
+	if !c.valid() {
+		err = errors.New("client is not valid")
+		return
+	}
+
+	payload := c.existingPayload(filename)
+	fullURL := c.existingURL()
+	result, err := basicRequest(fullURL, payload)
 
 	if err != nil {
-		fmt.Println(err.Error())
 		return
 	}
 	if result.StatusCode != http.StatusOK {
@@ -113,12 +120,34 @@ func (c Client) exists(filename string) (link Link, err error) {
 		} else {
 			err = fmt.Errorf("no existing link for %v", filename)
 		}
-
 	}
 	return
 }
 
-func (c Client) create(filename string) (ok bool, err error) {
+func (c Client) create(filename string) (link Link, err error) {
+	if !c.valid() {
+		err = errors.New("client is not valid")
+		return
+	}
+
+	payload := c.creationPayload(filename)
+	fullURL := c.creationURL()
+	result, err := basicRequest(fullURL, payload)
+
+	if err != nil {
+		return
+	}
+	if result.StatusCode != http.StatusOK {
+		err = fmt.Errorf("dropbox returned a %d", result.StatusCode)
+		return
+	}
+
+	var rawBody []byte
+	rawBody, err = ioutil.ReadAll(result.Body)
+	defer result.Body.Close()
+	if err == nil {
+		json.Unmarshal(rawBody, &link)
+	}
 	return
 }
 

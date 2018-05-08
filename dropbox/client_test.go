@@ -29,6 +29,23 @@ func TestExistsWithInvalidAuthServer(t *testing.T) {
 	assert.Equal(t, "dropbox returned a 400", err.Error())
 }
 
+func TestCreationSuccess(t *testing.T) {
+	c := NewClient()
+	apiStub := stubCreationSuccess(existingFile)
+	c.Host = apiStub.URL
+	url, err := c.create(existingFile)
+	assert.Nil(t, err)
+	assert.Equal(t, "https://dl.dropboxusercontent.com/s/DROPBOX_HASH/file+name+1.gif", url.DirectLink())
+}
+
+func TestCreationFailure(t *testing.T) {
+	c := NewClient()
+	apiStub := stubCreationFailure()
+	c.Host = apiStub.URL
+	_, err := c.create(missingFile)
+	assert.Equal(t, "dropbox returned a 409", err.Error())
+}
+
 func TestExistsWithNoLinks(t *testing.T) {
 	c := NewClient()
 	apiStub := stubUnshared()
