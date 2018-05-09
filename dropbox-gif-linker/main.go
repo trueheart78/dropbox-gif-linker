@@ -51,13 +51,14 @@ func main() {
 				fmt.Printf("Woops! %v", err.Error())
 				continue
 			}
-			fmt.Println(cleaned)
+			// fmt.Println(cleaned)
 			link, err = dropboxClient.CreateLink(cleaned)
 			if err != nil {
 				fmt.Printf("Error creating link: %v", err.Error())
 				continue
 			}
-			fmt.Println(messages.LinkText(link.DirectLink()))
+			fmt.Println(messages.LinkTextOld(link.DirectLink()))
+			fmt.Println(messages.LinkTextNew(link.DirectLink()))
 		}
 	}
 }

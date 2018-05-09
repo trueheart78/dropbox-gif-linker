@@ -24,6 +24,11 @@ func TestDataClean(t *testing.T) {
 	_, err = h.Clean(badGif)
 	assert.NotNil(t, err)
 	assert.Equal(t, fmt.Sprintf("not a gif [%v]", badGif), err.Error())
+
+	badGif = "/sample/gif.gif gif.gif"
+	_, err = h.Clean(badGif)
+	assert.NotNil(t, err)
+	assert.Equal(t, fmt.Sprintf("multiple gifs detected in %v", badGif), err.Error())
 }
 
 func TestDataIsGif(t *testing.T) {

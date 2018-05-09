@@ -1,8 +1,9 @@
 package messages
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type testError struct {
@@ -69,5 +70,21 @@ func TestInputError(t *testing.T) {
 	received := InputError(err)
 	expected := "\x1b[0;31mError reading input: sample error\x1b[0m"
 
+	assert.Equal(expected, received)
+}
+
+func TestLinkTextOld(t *testing.T) {
+	assert := assert.New(t)
+
+	received := LinkTextOld("sample.gif")
+	expected := "\x1b[0;97msample.gif\x1b[0m"
+	assert.Equal(expected, received)
+}
+
+func TestLinkTextNew(t *testing.T) {
+	assert := assert.New(t)
+
+	received := LinkTextNew("sample.gif")
+	expected := "\x1b[0;93msample.gif\x1b[0m"
 	assert.Equal(expected, received)
 }

@@ -36,9 +36,14 @@ func InputError(err error) string {
 	return color.Red(fmt.Sprintf("Error reading input: %v", err.Error()))
 }
 
-// LinkText returns a properly formatted link
-func LinkText(text string) string {
-	return color.LightRed(fmt.Sprintf("%v", text))
+// LinkTextOld returns a properly formatted link
+func LinkTextOld(text string) string {
+	return color.White(fmt.Sprintf("%v", text))
+}
+
+// LinkTextNew returns a properly formatted link
+func LinkTextNew(text string) string {
+	return color.LightYellow(fmt.Sprintf("%v", text))
 }
 
 func spacing() string {

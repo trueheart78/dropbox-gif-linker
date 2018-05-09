@@ -24,6 +24,9 @@ func (h Handler) Clean(data string) (clean string, err error) {
 	if !h.isGif(clean) {
 		err = fmt.Errorf("not a gif [%v]", clean)
 	}
+	if strings.Count(clean, ".gif") > 1 {
+		err = fmt.Errorf("multiple gifs detected in %v", clean)
+	}
 	return
 }
 

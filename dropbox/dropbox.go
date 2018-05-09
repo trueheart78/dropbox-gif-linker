@@ -239,7 +239,6 @@ func (c Client) CreateLink(filename string) (link Link, err error) {
 	if err != nil {
 		return
 	}
-	fmt.Println(filename)
 	link, err = c.exists(filename)
 	if err != nil {
 		if strings.HasPrefix(err.Error(), "no existing link") {
@@ -254,8 +253,7 @@ func (c Client) CreateLink(filename string) (link Link, err error) {
 // removes the dropbox path from the filename
 func (c Client) truncate(filename string) (truncated string, err error) {
 	if !strings.HasPrefix(filename, c.Config.FullPath()) {
-		fmt.Println(c.Config.FullPath())
-		err = errors.New("filepath does not contain the dropbox path")
+		err = fmt.Errorf("filepath does not contain the dropbox path [%v]", c.Config.FullPath())
 		return
 	}
 	truncated = strings.Replace(filename, c.Config.FullPath(), "", 1)

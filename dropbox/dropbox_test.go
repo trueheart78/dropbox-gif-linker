@@ -49,7 +49,7 @@ var client = Client{
 	Version: version,
 }
 var apiToken = "xxx"
-var fullPath = "xxxx/xxx"
+var fullPath = "/my/path/to/dropbox/"
 var gifDir = "/gifs"
 var validConfig = testConfig{fullPath, gifDir, apiToken, true}
 var invalidConfig = testConfig{fullPath, gifDir, apiToken, false}
@@ -160,11 +160,11 @@ func TestClientTruncate(t *testing.T) {
 	originalFilename := filepath.Join(validConfig.FullPath(), "example", "sample.gif")
 	truncatedFilename, err := c.truncate(originalFilename)
 
-	assert.Equal(t, "/example/sample.gif", truncatedFilename)
+	assert.Equal(t, "example/sample.gif", truncatedFilename)
 	assert.Nil(t, err)
 
 	_, err = c.truncate("invalid/dropbox/path.gif")
-	assert.Equal(t, "filepath does not contain the dropbox path", err.Error())
+	assert.Equal(t, fmt.Sprintf("filepath does not contain the dropbox path [%v]", fullPath), err.Error())
 	assert.NotNil(t, err)
 }
 
