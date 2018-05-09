@@ -2,9 +2,12 @@
 
 Designed to make working with your Dropbox gifs easier when wanting to share them.
 
-## Usage
+## Dropbox Integration
 
-Download the respective binary for your system, open a terminal, and execute it.
+First, you need to create a new [Dropbox app][dropbox-new-app], using the **Dropbox API** (not the 
+business option), with **Full Dropbox** access. Once you have that setup, you will need to click 
+the _Generate_ button beneath the **Generate Access Token** header of the **OAuth2** section. This 
+is the token that will be used for interacting with your Dropbox account.
 
 ## Configuration
 
@@ -18,7 +21,11 @@ In your home directory, make sure to create `.dgl.json` file, and fill in the de
 }
 ```
 
-⚠️ The program will not load if you do not have this file setup correctly.
+⚠️ The program will not load if you do not have this file setup correctly. All details are required.
+
+## Usage
+
+Download the respective binary for your system, open a terminal, and execute it.
 
 ### `gif-listener`
 
@@ -40,3 +47,5 @@ press enter to have it present a shareable link. You can also drag and drop mult
 ## :warning: Shared Gif Folder :warning:
 
 If you have shared your Dropbox gifs directory at its root, this program will not work as expected.
+
+[dropbox-new-app]: https://www.dropbox.com/developers/apps
