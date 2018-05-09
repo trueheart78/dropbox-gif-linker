@@ -39,6 +39,9 @@ func (t testConfig) Token() string {
 func (t testConfig) Valid() bool {
 	return t.valid
 }
+func (t testConfig) Environment() string {
+	return "test"
+}
 
 var missingFile = "/gifs/def.gif"
 var existingFile = "/gifs/file name 1.gif"

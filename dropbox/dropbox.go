@@ -38,6 +38,7 @@ type configInterface interface {
 	GifsPath() string
 	Token() string
 	Valid() bool
+	Environment() string
 }
 
 type existingPayload struct {
@@ -150,6 +151,11 @@ func (c Config) Token() string {
 		return c.APIToken
 	}
 	return ""
+}
+
+// Environment returns the environment for the Config
+func (c Config) Environment() string {
+	return "development"
 }
 
 // Valid returns whether the config is valid
