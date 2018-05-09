@@ -26,7 +26,8 @@ func init() {
 }
 
 func main() {
-	var input string
+	var link dropbox.Link
+	var input, cleaned string
 	var err error
 	mode := "url"
 	reader := bufio.NewReader(os.Stdin)
@@ -45,12 +46,18 @@ func main() {
 			mode = "md"
 			fmt.Println(messages.ModeShift("md"))
 		} else {
-			fmt.Printf("You entered: %v\n", input)
-			_, err = handler.Clean(input)
+			cleaned, err = handler.Clean(input)
 			if err != nil {
 				fmt.Printf("Woops! %v", err.Error())
 				continue
 			}
+			fmt.Println(cleaned)
+			link, err = dropboxClient.CreateLink(cleaned)
+			if err != nil {
+				fmt.Printf("Error creating link: %v", err.Error())
+				continue
+			}
+			fmt.Println(messages.LinkText(link.DirectLink()))
 		}
 	}
 }

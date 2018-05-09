@@ -127,7 +127,11 @@ func (c *Config) gifDirFix() {
 // FullPath provides the full dropbox & gifs path
 func (c Config) FullPath() string {
 	if c.Valid() {
-		return filepath.Join(c.DropboxPath, c.GifDir)
+		path, err := homedir.Expand(filepath.Join(c.DropboxPath, c.GifDir))
+		if err != nil {
+			return ""
+		}
+		return path
 	}
 	return ""
 }
@@ -231,6 +235,11 @@ func (c Client) basicRequest(fullURL string, payload bytes.Buffer) (result *http
 
 // CreateLink handles the filename and returns the Link object
 func (c Client) CreateLink(filename string) (link Link, err error) {
+	filename, err = c.truncate(filename)
+	if err != nil {
+		return
+	}
+	fmt.Println(filename)
 	link, err = c.exists(filename)
 	if err != nil {
 		if strings.HasPrefix(err.Error(), "no existing link") {
@@ -239,6 +248,17 @@ func (c Client) CreateLink(filename string) (link Link, err error) {
 		}
 		return
 	}
+	return
+}
+
+// removes the dropbox path from the filename
+func (c Client) truncate(filename string) (truncated string, err error) {
+	if !strings.HasPrefix(filename, c.Config.FullPath()) {
+		fmt.Println(c.Config.FullPath())
+		err = errors.New("filepath does not contain the dropbox path")
+		return
+	}
+	truncated = strings.Replace(filename, c.Config.FullPath(), "", 1)
 	return
 }
 

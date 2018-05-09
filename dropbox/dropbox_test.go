@@ -154,8 +154,23 @@ func TestConfigValidate(t *testing.T) {
 	assert.NotNil(err)
 }
 
+func TestClientTruncate(t *testing.T) {
+	c := newClient(validConfig)
+
+	originalFilename := filepath.Join(validConfig.FullPath(), "example", "sample.gif")
+	truncatedFilename, err := c.truncate(originalFilename)
+
+	assert.Equal(t, "/example/sample.gif", truncatedFilename)
+	assert.Nil(t, err)
+
+	_, err = c.truncate("invalid/dropbox/path.gif")
+	assert.Equal(t, "filepath does not contain the dropbox path", err.Error())
+	assert.NotNil(t, err)
+}
+
 func TestClientFixFilename(t *testing.T) {
 	c := newClient(validConfig)
+
 	originalFilename := "sample.gif"
 	fixedFilename := c.fixFilename(originalFilename)
 	// makes sure the basic file is in the gifs dropbox path
@@ -165,6 +180,11 @@ func TestClientFixFilename(t *testing.T) {
 	fixedFilename = c.fixFilename(originalFilename)
 	// makes sure the full file is in the gifs dropbox path
 	assert.Equal(t, "/gifs/sample/hello/sample.gif", fixedFilename)
+
+	originalFilename = "/example/sample/hello/sample.gif"
+	fixedFilename = c.fixFilename(originalFilename)
+	// makes sure the full file is in the gifs dropbox path
+	assert.Equal(t, "/gifs/example/sample/hello/sample.gif", fixedFilename)
 
 	originalFilename = "/gifs/sample/hello/sample.gif"
 	fixedFilename = c.fixFilename(originalFilename)
