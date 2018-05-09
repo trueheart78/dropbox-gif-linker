@@ -13,6 +13,7 @@ import (
 	"github.com/trueheart78/dropbox-gif-linker/messages"
 )
 
+var version = "0.6"
 var dropboxClient dropbox.Client
 var mode = "url"
 
@@ -26,6 +27,11 @@ func md() bool {
 
 func init() {
 	var err error
+	if len(os.Args) >= 2 && os.Args[1] == "version" {
+		fmt.Printf("Version %v\n", version)
+		os.Exit(0)
+	}
+
 	dropboxClient, err = dropbox.DefaultClient()
 	if err != nil {
 		fmt.Println(err)
