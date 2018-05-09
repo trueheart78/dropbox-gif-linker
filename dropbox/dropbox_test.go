@@ -232,6 +232,7 @@ func TestClientCreationSuccess(t *testing.T) {
 	url, err := c.create(existingFile)
 	assert.Nil(t, err)
 	assert.Equal(t, "https://dl.dropboxusercontent.com/s/DROPBOX_HASH/file+name+1.gif", url.DirectLink())
+	assert.Equal(t, fmt.Sprintf("![%v](%v)", url.Name, "https://dl.dropboxusercontent.com/s/DROPBOX_HASH/file+name+1.gif"), url.Markdown())
 }
 
 func TestClientCreationExists(t *testing.T) {

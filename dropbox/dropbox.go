@@ -331,8 +331,8 @@ func (c Client) create(filename string) (link Link, err error) {
 // DirectLink returns the embeddable string
 // From: https://www.dropbox.com/s/eqoo012hoa0wq7k/taylor%20bat%20focused.gif?dl=0
 // To:   https://dl.dropboxusercontent.com/s/eqoo012hoa0wq7k/taylor%20bat%20focused.gif
-func (e Link) DirectLink() string {
-	u, err := url.Parse(e.URL)
+func (l Link) DirectLink() string {
+	u, err := url.Parse(l.URL)
 	if err != nil {
 		panic(err)
 	}
@@ -341,6 +341,11 @@ func (e Link) DirectLink() string {
 	// remove the dl=0 query
 	u.RawQuery = ""
 	return u.String()
+}
+
+// Markdown returns the embeddable markdown string
+func (l Link) Markdown() string {
+	return fmt.Sprintf("![%v](%v)", l.Name, l.DirectLink())
 }
 
 func (c Client) fixFilename(filename string) string {
