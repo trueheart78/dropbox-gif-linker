@@ -9,7 +9,7 @@ const (
 	// Library name
 	Library = "dropbox-gif-linker"
 	// Current version of the library
-	Current = 0.6
+	Current = 0.8
 )
 
 // Full returns the full version string

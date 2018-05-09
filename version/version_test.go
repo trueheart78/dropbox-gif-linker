@@ -9,7 +9,7 @@ import (
 )
 
 func TestSample(t *testing.T) {
-	assert.Equal(t, 0.6, Current)
+	assert.Equal(t, 0.8, Current)
 }
 
 func TestFullVersion(t *testing.T) {
