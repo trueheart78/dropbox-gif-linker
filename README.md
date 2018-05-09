@@ -27,13 +27,9 @@ In your home directory, make sure to create `.dgl.json` file, and fill in the de
 
 Download the respective binary for your system, open a terminal, and execute it.
 
-### `gif-listener`
+### `dropbox-gif-linker`
 
-Listens for gif paths to be entered and checks with the local database before reaching out to 
-create a new shareable link via the Dropbox API.
-
-Data displayed includes the name of the id gif, its directories, basename, size, number of times 
-used, and the data copied to the clipboard
+Handles talking to the DropBox API for you.
 
 ![listener example](assets/images/listener-example.gif)
 
