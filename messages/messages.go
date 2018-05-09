@@ -46,6 +46,11 @@ func LinkTextNew(text string) string {
 	return color.LightYellow(fmt.Sprintf("%v", text))
 }
 
+// Help returns a properly formatted line of help text
+func Help(text string) string {
+	return color.LightYellow(fmt.Sprintf("%v", text))
+}
+
 func spacing() string {
 	return "               "
 }

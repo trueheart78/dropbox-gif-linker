@@ -1,43 +1,56 @@
 package commands
 
-var exitCommands = make(map[string]bool)
-var urlCommands = make(map[string]bool)
-var markdownCommands = make(map[string]bool)
+import (
+	"fmt"
+	"strings"
+)
 
-func init() {
-	exitCommands["exit"] = true
-	exitCommands[":exit"] = true
-	exitCommands["ex"] = true
-	exitCommands["e"] = true
-	exitCommands[":e"] = true
-	exitCommands["quit"] = true
-	exitCommands["q"] = true
-	exitCommands[":quit"] = true
-	exitCommands[":q"] = true
+var exitCommands = [5]string{"exit", "ex", "e", "quit", "q"}
+var urlCommands = [2]string{"url", "u"}
+var markdownCommands = [3]string{"markdown", "md", "m"}
+var helpCommands = [3]string{"help", "he", "h"}
 
-	urlCommands["url"] = true
-	urlCommands["u"] = true
-	urlCommands[":url"] = true
-	urlCommands[":u"] = true
-
-	markdownCommands["markdown"] = true
-	markdownCommands["md"] = true
-	markdownCommands["m"] = true
-	markdownCommands[":md"] = true
-	markdownCommands[":m"] = true
+// Exit returns true if the input is an exit command
+func Exit(input string) (exists bool) {
+	return supported(input, exitCommands[:])
 }
 
-func Exit(input string) bool {
-	_, exist := exitCommands[input]
-	return exist
+// URLMode returns true if the input is a url mode command
+func URLMode(input string) (exists bool) {
+	return supported(input, urlCommands[:])
 }
 
-func UrlMode(input string) bool {
-	_, exist := urlCommands[input]
-	return exist
-}
-
+// MarkdownMode returns true if the input is a markdown mode command
 func MarkdownMode(input string) bool {
-	_, exist := markdownCommands[input]
-	return exist
+	return supported(input, markdownCommands[:])
+}
+
+// Help returns true if the input is a help command
+func Help(input string) bool {
+	return supported(input, helpCommands[:])
+}
+
+// HelpOutput outputs the entries for each command
+func HelpOutput() string {
+	output := "Supported Commands:\n"
+	output += fmt.Sprintf(" %v - Shift to URL Mode:\n", strings.Join(urlCommands[:], ", "))
+	output += fmt.Sprintf(" %v - Shift to Markdown Mode:\n", strings.Join(markdownCommands[:], ", "))
+	output += fmt.Sprintf(" %v - Exit Program:\n", strings.Join(exitCommands[:], ", "))
+	output += fmt.Sprintf(" %v - Help (This Menu)\n", strings.Join(helpCommands[:], ", "))
+
+	return output
+}
+
+// returns whether the passed input (or a variant) exists in the commands slice
+func supported(input string, commands []string) (exists bool) {
+	if strings.HasPrefix(input, ":") {
+		input = strings.Replace(input, ":", "", 1)
+	}
+	for _, k := range commands {
+		if input == k {
+			exists = true
+			break
+		}
+	}
+	return
 }

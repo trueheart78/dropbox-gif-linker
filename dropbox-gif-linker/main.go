@@ -27,7 +27,7 @@ func init() {
 
 func main() {
 	var link dropbox.Link
-	var input, cleaned string
+	var input, cleaned, help string
 	var err error
 	mode := "url"
 	reader := bufio.NewReader(os.Stdin)
@@ -39,12 +39,17 @@ func main() {
 		if commands.Exit(input) {
 			fmt.Println(messages.Goodbye())
 			break
-		} else if commands.UrlMode(input) {
+		} else if commands.URLMode(input) {
 			mode = "url"
 			fmt.Println(messages.ModeShift("url"))
 		} else if commands.MarkdownMode(input) {
 			mode = "md"
 			fmt.Println(messages.ModeShift("md"))
+		} else if commands.Help(input) {
+			if help == "" {
+				help = fmt.Sprintf("Usage: Drag and drop a single gif at a time.\n\n%v", commands.HelpOutput())
+			}
+			fmt.Println(messages.Help(help))
 		} else {
 			cleaned, err = handler.Clean(input)
 			if err != nil {
