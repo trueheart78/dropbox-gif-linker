@@ -7,8 +7,9 @@ import (
 )
 
 // Welcome returns a properly formatted greeting
-func Welcome() string {
-	return fmt.Sprintf("%v %v %v", heart(), color.LightCyan("Welcome to Dropbox Gif Listener"), heart())
+func Welcome(version float64) string {
+	versionOutput := color.LightCyan(fmt.Sprintf("v%.2f", version))
+	return fmt.Sprintf("%v %v %v %v", heart(), color.LightCyan("Welcome to Dropbox Gif Listener"), versionOutput, heart())
 }
 
 // Goodbye returns a properly formatted goodbye

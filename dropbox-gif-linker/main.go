@@ -11,9 +11,9 @@ import (
 	"github.com/trueheart78/dropbox-gif-linker/data"
 	"github.com/trueheart78/dropbox-gif-linker/dropbox"
 	"github.com/trueheart78/dropbox-gif-linker/messages"
+	"github.com/trueheart78/dropbox-gif-linker/version"
 )
 
-var version = "0.6"
 var dropboxClient dropbox.Client
 var mode = "url"
 
@@ -28,7 +28,7 @@ func md() bool {
 func init() {
 	var err error
 	if len(os.Args) >= 2 && os.Args[1] == "version" {
-		fmt.Printf("Version %v\n", version)
+		fmt.Println(version.Full())
 		os.Exit(0)
 	}
 
@@ -38,7 +38,7 @@ func init() {
 		os.Exit(1)
 	}
 
-	fmt.Println(messages.Welcome())
+	fmt.Println(messages.Welcome(version.Current))
 }
 
 func capture(link dropbox.Link) {
