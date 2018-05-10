@@ -156,6 +156,8 @@ func main() {
 					fmt.Printf("Woops! %v\n", err.Error())
 					continue
 				}
+				// TODO: let's check with the Gifs table to see if it already exists!
+
 				link, err = dropboxClient.CreateLink(cleaned)
 				if err != nil {
 					fmt.Printf("Error creating link: %v\n", err.Error())
