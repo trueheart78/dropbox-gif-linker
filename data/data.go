@@ -2,6 +2,7 @@ package data
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -26,6 +27,16 @@ func (h Handler) Clean(data string) (clean string, err error) {
 	}
 	if strings.Count(clean, ".gif") > 1 {
 		err = fmt.Errorf("multiple gifs detected in %v", clean)
+	}
+	return
+}
+
+// ID returns an int-based ID
+func (h Handler) ID(data string) (id int, err error) {
+	data = strings.TrimSpace(data)
+	id, err = strconv.Atoi(data)
+	if err != nil {
+		err = fmt.Errorf("not an id [%v]", data)
 	}
 	return
 }

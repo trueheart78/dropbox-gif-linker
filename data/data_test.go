@@ -31,6 +31,31 @@ func TestDataClean(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf("multiple gifs detected in %v", badGif), err.Error())
 }
 
+func TestDataIsID(t *testing.T) {
+	id, err := h.ID("123")
+	assert.Equal(t, 123, id)
+	assert.Nil(t, err)
+
+	id, err = h.ID("    2345 ")
+	assert.Equal(t, 2345, id)
+	assert.Nil(t, err)
+
+	id, err = h.ID("\t12\n")
+	assert.Equal(t, 12, id)
+	assert.Nil(t, err)
+
+	id, err = h.ID("23 45 ")
+	assert.Equal(t, "not an id [23 45]", err.Error())
+	assert.NotNil(t, err)
+
+	id, err = h.ID("23.45 ")
+	assert.Equal(t, "not an id [23.45]", err.Error())
+	assert.NotNil(t, err)
+	id, err = h.ID("\t swift \t ")
+	assert.Equal(t, "not an id [swift]", err.Error())
+	assert.NotNil(t, err)
+}
+
 func TestDataIsGif(t *testing.T) {
 	assert.True(t, h.isGif("sample.gif"))
 	assert.True(t, h.isGif("sample.GIF"))

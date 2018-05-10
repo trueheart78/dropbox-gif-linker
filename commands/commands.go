@@ -8,7 +8,8 @@ import (
 var exitCommands = [5]string{"exit", "ex", "e", "quit", "q"}
 var urlCommands = [2]string{"url", "u"}
 var markdownCommands = [3]string{"markdown", "md", "m"}
-var helpCommands = [3]string{"help", "he", "h"}
+var configCommands = [4]string{"config", "conf", "cfg", "c"}
+var helpCommands = [4]string{"help", "he", "h", "?"}
 
 // Exit returns true if the input is an exit command
 func Exit(input string) (exists bool) {
@@ -30,12 +31,18 @@ func Help(input string) bool {
 	return supported(input, helpCommands[:])
 }
 
+// Config returns true if the input is a help command
+func Config(input string) bool {
+	return supported(input, configCommands[:])
+}
+
 // HelpOutput outputs the entries for each command
 func HelpOutput() string {
 	output := "Supported Commands:\n"
-	output += fmt.Sprintf(" %v - Shift to URL Mode:\n", strings.Join(urlCommands[:], ", "))
-	output += fmt.Sprintf(" %v - Shift to Markdown Mode:\n", strings.Join(markdownCommands[:], ", "))
-	output += fmt.Sprintf(" %v - Exit Program:\n", strings.Join(exitCommands[:], ", "))
+	output += fmt.Sprintf(" %v - Shift to URL Mode\n", strings.Join(urlCommands[:], ", "))
+	output += fmt.Sprintf(" %v - Shift to Markdown Mode\n", strings.Join(markdownCommands[:], ", "))
+	output += fmt.Sprintf(" %v - Loaded Configuration\n", strings.Join(configCommands[:], ", "))
+	output += fmt.Sprintf(" %v - Exit Program\n", strings.Join(exitCommands[:], ", "))
 	output += fmt.Sprintf(" %v - Help (This Menu)\n", strings.Join(helpCommands[:], ", "))
 
 	return output

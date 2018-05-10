@@ -40,6 +40,7 @@ type configInterface interface {
 	Valid() bool
 	Environment() string
 	DatabasePath() string
+	LoadedPath() string
 }
 
 type existingPayload struct {
@@ -156,6 +157,14 @@ func (c Config) DatabasePath() string {
 		return fmt.Sprintf("%v/%v.sqlite3.db", filepath.Join(wd, "../", "db"), c.Environment())
 	}
 	return fmt.Sprintf("%v/gifs.sqlite3.db", filepath.Join(c.FullPath(), ".gifs"))
+}
+
+// LoadedPath provides the full path to the loaded config file
+func (c Config) LoadedPath() string {
+	if !c.Valid() {
+		return ""
+	}
+	return c.Path
 }
 
 // Token returns the api token for use in API calls

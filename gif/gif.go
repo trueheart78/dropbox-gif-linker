@@ -70,12 +70,15 @@ func (r Record) Save() (ok bool, err error) {
 	if r.ID == 0 {
 		return r.Create()
 	}
+
+	ok = true
 	return
 }
 
 // Create makes a new record in the database
 func (r Record) Create() (ok bool, err error) {
 
+	ok = true
 	return
 }
 
@@ -87,8 +90,11 @@ func Init() (ok bool, err error) {
 		return
 	}
 	fmt.Println(databasePath)
-	os.Remove(databasePath)
-	db, err = sql.Open("sqlite3", databasePath)
+	_, err = removeDatabase()
+	if err != nil {
+		return
+	}
+	_, err = Connect()
 	if err != nil {
 		return
 	}
@@ -102,8 +108,22 @@ func Init() (ok bool, err error) {
 		return
 	}
 
-	ok = true
 	defer db.Close()
+	ok = true
+	return
+}
+
+// Connect to the database
+func Connect() (ok bool, err error) {
+	if databasePath == "" {
+		err = errors.New("no database path set")
+		return
+	}
+	db, err = sql.Open("sqlite3", databasePath)
+	if err != nil {
+		return
+	}
+	ok = true
 	return
 }
 
@@ -112,6 +132,15 @@ func Close() {
 	if db != nil {
 		db.Close()
 	}
+}
+
+func removeDatabase() (ok bool, err error) {
+	if databasePath == "" {
+		err = errors.New("no database path set")
+		return
+	}
+	ok = true
+	return
 }
 
 func structureStatement() (data string, err error) {

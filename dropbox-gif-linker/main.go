@@ -10,6 +10,7 @@ import (
 	"github.com/trueheart78/dropbox-gif-linker/commands"
 	"github.com/trueheart78/dropbox-gif-linker/data"
 	"github.com/trueheart78/dropbox-gif-linker/dropbox"
+	"github.com/trueheart78/dropbox-gif-linker/gif"
 	"github.com/trueheart78/dropbox-gif-linker/messages"
 	"github.com/trueheart78/dropbox-gif-linker/version"
 )
@@ -38,6 +39,9 @@ func init() {
 		os.Exit(1)
 	}
 
+	gif.SetDatabasePath(dropboxClient.Config.DatabasePath())
+	gif.Init()
+
 	fmt.Println(messages.Welcome(version.Current))
 }
 
@@ -57,8 +61,10 @@ func capture(link dropbox.Link) {
 
 func main() {
 	var link, cachedLink dropbox.Link
-	var input, cleaned, help string
+	var input, cleaned, help, config string
 	var err error
+	var id int
+	defer gif.Close()
 	reader := bufio.NewReader(os.Stdin)
 	handler := data.NewHandler()
 	for {
@@ -81,22 +87,38 @@ func main() {
 				help = fmt.Sprintf("Usage: Drag and drop a single gif at a time.\n\n%v", commands.HelpOutput())
 			}
 			fmt.Println(messages.Help(help))
+		} else if commands.Config(input) {
+			if config == "" {
+				config = "Current Config:\n"
+				config += fmt.Sprintf("- Path:      %v\n", dropboxClient.Config.LoadedPath())
+				config += fmt.Sprintf("- Gifs Path: %v\n", dropboxClient.Config.FullPath())
+				config += fmt.Sprintf("- Database:  %v\n", dropboxClient.Config.DatabasePath())
+				config += fmt.Sprintf("- Token:     %v\n", dropboxClient.Config.Token())
+			}
+			fmt.Println(messages.Help(config))
 		} else {
-			// TODO: db connect
-			cleaned, err = handler.Clean(input)
-			if err != nil {
-				fmt.Printf("Woops! %v\n", err.Error())
+			gif.Connect()
+			id, err = handler.ID(input)
+			if err == nil {
+				fmt.Printf("Finding a gif for ID %d\n", id)
 				continue
+			} else {
+				cleaned, err = handler.Clean(input)
+				if err != nil {
+					fmt.Printf("Woops! %v\n", err.Error())
+					continue
+				}
+
+				cachedLink = link
+				link, err = dropboxClient.CreateLink(cleaned)
+				if err != nil {
+					link = cachedLink
+					fmt.Printf("Error creating link: %v\n", err.Error())
+					continue
+				}
+				capture(link)
 			}
-			cachedLink = link
-			link, err = dropboxClient.CreateLink(cleaned)
-			if err != nil {
-				link = cachedLink
-				fmt.Printf("Error creating link: %v\n", err.Error())
-				continue
-			}
-			capture(link)
-			// TODO: db disconnect
+			gif.Close()
 		}
 	}
 }
