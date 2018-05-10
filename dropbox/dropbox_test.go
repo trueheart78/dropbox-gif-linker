@@ -262,6 +262,7 @@ func TestClientCreationSuccess(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "https://dl.dropboxusercontent.com/s/DROPBOX_HASH/file+name+1.gif", url.DirectLink())
 	assert.Equal(t, fmt.Sprintf("![%v](%v)", url.Name, "https://dl.dropboxusercontent.com/s/DROPBOX_HASH/file+name+1.gif"), url.Markdown())
+	assert.Equal(t, "/s/DROPBOX_HASH", url.RemotePath())
 }
 
 func TestClientCreationExists(t *testing.T) {

@@ -376,6 +376,17 @@ func (l Link) Markdown() string {
 	return fmt.Sprintf("![%v](%v)", l.Name, l.DirectLink())
 }
 
+// RemotePath returns the "s/DROPBOX_HASH"
+func (l Link) RemotePath() string {
+	u, err := url.Parse(l.URL)
+	if err != nil {
+		panic(err)
+	}
+	base := filepath.Base(u.Path)
+	return strings.Replace(u.Path, filepath.Join("/", base), "", 1)
+
+}
+
 func (c Client) fixFilename(filename string) string {
 	if !strings.HasPrefix(filename, c.Config.GifsPath()) {
 		return filepath.Join(c.Config.GifsPath(), filename)
