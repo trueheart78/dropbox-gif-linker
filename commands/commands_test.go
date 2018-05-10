@@ -11,7 +11,7 @@ func TestSupportedCommands(t *testing.T) {
 	assert.Equal(t, [5]string{"exit", "ex", "e", "quit", "q"}, exitCommands)
 	assert.Equal(t, [2]string{"url", "u"}, urlCommands)
 	assert.Equal(t, [3]string{"markdown", "md", "m"}, markdownCommands)
-	assert.Equal(t, [3]string{"help", "he", "h"}, helpCommands)
+	assert.Equal(t, [4]string{"help", "he", "h", "?"}, helpCommands)
 }
 
 func TestExit(t *testing.T) {

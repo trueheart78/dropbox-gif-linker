@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/exec"
+	"runtime"
 	"strings"
 
 	"github.com/trueheart78/dropbox-gif-linker/clipboard"
@@ -24,6 +26,18 @@ func url() bool {
 
 func md() bool {
 	return mode == "md"
+}
+
+func clearScreen() {
+	if runtime.GOOS == "windows" {
+		cmd := exec.Command("cmd", "/c", "cls")
+		cmd.Stdout = os.Stdout
+		cmd.Run()
+	} else {
+		cmd := exec.Command("clear")
+		cmd.Stdout = os.Stdout
+		cmd.Run()
+	}
 }
 
 func init() {
@@ -52,6 +66,7 @@ func init() {
 	gif.SetDatabasePath(dropboxClient.Config.DatabasePath())
 	gif.Init()
 
+	clearScreen()
 	fmt.Println(messages.Welcome(version.Current))
 }
 
@@ -87,7 +102,7 @@ func main() {
 	var input, cleaned string
 	var err error
 	var id int
-	defer gif.Close()
+	defer gif.Disconnect()
 	reader := bufio.NewReader(os.Stdin)
 	handler := data.NewHandler()
 	for {
@@ -131,7 +146,7 @@ func main() {
 				}
 				capture(link)
 			}
-			gif.Close()
+			gif.Disconnect()
 		}
 	}
 }

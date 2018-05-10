@@ -315,7 +315,7 @@ func (c Client) exists(filename string) (link Link, err error) {
 		json.Unmarshal(rawBody, &exists)
 		if len(exists.Links) > 0 {
 			for _, l := range exists.Links {
-				if l.Path == filename {
+				if strings.ToLower(l.Path) == strings.ToLower(filename) {
 					link = l
 					return
 				}

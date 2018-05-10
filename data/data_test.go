@@ -25,6 +25,11 @@ func TestDataClean(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Equal(t, fmt.Sprintf("not a gif [%v]", badGif), err.Error())
 
+	badGif = "/sample/I\\'m not a gif"
+	data, err = h.Clean(badGif)
+	assert.NotNil(t, err)
+	assert.Equal(t, fmt.Sprintf("not a gif [%v]", data), err.Error())
+
 	badGif = "/sample/gif.gif gif.gif"
 	_, err = h.Clean(badGif)
 	assert.NotNil(t, err)
