@@ -28,9 +28,19 @@ func md() bool {
 
 func init() {
 	var err error
-	if len(os.Args) >= 2 && os.Args[1] == "version" {
-		fmt.Println(version.Full())
-		os.Exit(0)
+	if len(os.Args) >= 2 {
+		if os.Args[1] == "version" {
+			fmt.Println(version.Full())
+			os.Exit(0)
+		}
+
+		if os.Args[1] == "md" || os.Args[1] == "markdown" {
+			mode = "md"
+		}
+
+		if os.Args[1] == "url" {
+			mode = "url"
+		}
 	}
 
 	dropboxClient, err = dropbox.DefaultClient()
@@ -59,9 +69,22 @@ func capture(link dropbox.Link) {
 	// fmt.Println(messages.LinkTextOld(link.DirectLink()))
 }
 
+func configMessage() string {
+	config := "Current Config:\n"
+	config += fmt.Sprintf("- Path:      %v\n", dropboxClient.Config.LoadedPath())
+	config += fmt.Sprintf("- Gifs Path: %v\n", dropboxClient.Config.FullPath())
+	config += fmt.Sprintf("- Database:  %v\n", dropboxClient.Config.DatabasePath())
+	config += fmt.Sprintf("- Token:     %v\n", dropboxClient.Config.Token())
+	return config
+}
+
+func helpMessage() string {
+	return fmt.Sprintf("Usage: Drag and drop a single gif at a time.\n\n%v", commands.HelpOutput())
+}
+
 func main() {
 	var link, cachedLink dropbox.Link
-	var input, cleaned, help, config string
+	var input, cleaned string
 	var err error
 	var id int
 	defer gif.Close()
@@ -83,19 +106,9 @@ func main() {
 			fmt.Println(messages.ModeShift("md"))
 			capture(link)
 		} else if commands.Help(input) {
-			if help == "" {
-				help = fmt.Sprintf("Usage: Drag and drop a single gif at a time.\n\n%v", commands.HelpOutput())
-			}
-			fmt.Println(messages.Help(help))
+			fmt.Println(messages.Help(helpMessage()))
 		} else if commands.Config(input) {
-			if config == "" {
-				config = "Current Config:\n"
-				config += fmt.Sprintf("- Path:      %v\n", dropboxClient.Config.LoadedPath())
-				config += fmt.Sprintf("- Gifs Path: %v\n", dropboxClient.Config.FullPath())
-				config += fmt.Sprintf("- Database:  %v\n", dropboxClient.Config.DatabasePath())
-				config += fmt.Sprintf("- Token:     %v\n", dropboxClient.Config.Token())
-			}
-			fmt.Println(messages.Help(config))
+			fmt.Println(messages.Help(configMessage()))
 		} else {
 			gif.Connect()
 			id, err = handler.ID(input)
