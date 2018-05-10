@@ -82,6 +82,7 @@ func main() {
 			}
 			fmt.Println(messages.Help(help))
 		} else {
+			// TODO: db connect
 			cleaned, err = handler.Clean(input)
 			if err != nil {
 				fmt.Printf("Woops! %v\n", err.Error())
@@ -95,6 +96,7 @@ func main() {
 				continue
 			}
 			capture(link)
+			// TODO: db disconnect
 		}
 	}
 }

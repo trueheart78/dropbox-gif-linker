@@ -39,6 +39,7 @@ type configInterface interface {
 	Token() string
 	Valid() bool
 	Environment() string
+	DatabasePath() string
 }
 
 type existingPayload struct {
@@ -143,6 +144,18 @@ func (c Config) GifsPath() string {
 		return c.GifDir
 	}
 	return ""
+}
+
+// DatabasePath provides the full path to the database file
+func (c Config) DatabasePath() string {
+	if !c.Valid() {
+		return ""
+	}
+	if c.Environment() == "test" {
+		wd, _ := os.Getwd()
+		return fmt.Sprintf("%v/%v.sqlite3.db", filepath.Join(wd, "../", "db"), c.Environment())
+	}
+	return fmt.Sprintf("%v/gifs.sqlite3.db", filepath.Join(c.FullPath(), ".gifs"))
 }
 
 // Token returns the api token for use in API calls

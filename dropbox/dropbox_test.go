@@ -42,6 +42,12 @@ func (t testConfig) Valid() bool {
 func (t testConfig) Environment() string {
 	return "test"
 }
+func (t testConfig) DatabasePath() string {
+	if t.Environment() != "" {
+		return fmt.Sprintf("%v/gifs-%v.sqlite3.db", filepath.Join(t.FullPath(), ".gifs"), t.Environment())
+	}
+	return fmt.Sprintf("%v/gifs.sqlite3.db", filepath.Join(t.FullPath(), ".gifs"))
+}
 
 var missingFile = "/gifs/def.gif"
 var existingFile = "/gifs/file name 1.gif"
@@ -107,6 +113,17 @@ func TestConfigLoad(t *testing.T) {
 	assert.Equal("", d.APIToken)
 	assert.Equal(missingConfigFilename, d.Path)
 	assert.False(d.Loaded)
+}
+
+func TestConfigDatabasePath(t *testing.T) {
+	assert := assert.New(t)
+
+	// valid config
+	d := Config{}
+	d.load(validConfigFilename)
+
+	dbPath := filepath.Join(d.FullPath(), ".gifs", "gifs.sqlite3.db")
+	assert.Equal(dbPath, d.DatabasePath())
 }
 
 func TestConfigGifDirFix(t *testing.T) {
