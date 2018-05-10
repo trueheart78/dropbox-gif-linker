@@ -82,6 +82,13 @@ func Find(id int) (record Record, err error) {
 	return
 }
 
+// TODO: we need a way to parse the dropped in string to
+//       compare it to the database so we save trips to the
+//       dropbox api
+func xyz() bool {
+	return false
+}
+
 // Save captures the record to the database
 func (r *Record) Save() (ok bool, err error) {
 	if r.ID == 0 {

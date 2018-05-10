@@ -100,7 +100,6 @@ func capture(gifRecord gif.Record) {
 			clipboard.Write(gifRecord.URL())
 		}
 	}
-	// fmt.Println(messages.LinkTextOld(link.DirectLink()))
 }
 
 func configMessage() string {
