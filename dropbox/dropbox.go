@@ -73,6 +73,7 @@ type Link struct {
 	ServerModified string          `json:"server_modified"`
 	Revision       string          `json:"rev"`
 	FileSize       int             `json:"size"`
+	GifsDir        string
 }
 
 // LinkPermissions are the permissions that Dropbox as assigned
@@ -317,6 +318,7 @@ func (c Client) exists(filename string) (link Link, err error) {
 			for _, l := range exists.Links {
 				if strings.ToLower(l.Path) == strings.ToLower(filename) {
 					link = l
+					link.GifsDir = c.Config.GifsPath()
 					return
 				}
 			}
@@ -352,6 +354,7 @@ func (c Client) create(filename string) (link Link, err error) {
 	defer result.Body.Close()
 	if err == nil {
 		json.Unmarshal(rawBody, &link)
+		link.GifsDir = c.Config.GifsPath()
 	}
 	return
 }
@@ -384,7 +387,18 @@ func (l Link) RemotePath() string {
 	}
 	base := filepath.Base(u.Path)
 	return strings.Replace(u.Path, filepath.Join("/", base), "", 1)
+}
 
+// Directory returns the directory path
+func (l Link) Directory() string {
+	directory := strings.Replace(l.Path, filepath.Join("/", l.Name), "", 1)
+	directory = strings.Replace(directory, l.GifsDir, "", 1)
+	return directory
+}
+
+// DropboxID Returns the Dropbox ID
+func (l Link) DropboxID() string {
+	return strings.Replace(l.ID, "id:", "", 1)
 }
 
 func (c Client) fixFilename(filename string) string {

@@ -36,11 +36,11 @@ func generateRecord(id int64, sharedID string) (r Record) {
 		r.CreatedAt = dbTime()
 		r.UpdatedAt = dbTime()
 	}
-	r.BaseName = "swiftie.gif"
+	r.BaseName = "swiftie life 'the best' - 02.gif"
 	r.Directory = "taylor swift"
-	r.Size = 3456
+	r.FileSize = 3456
 	r.SharedLinkID = sharedID
-	r.SharedLink = SharedLink{
+	r.SharedLink = RecordSharedLink{
 		ID:         sharedID,
 		GifID:      r.ID,
 		RemotePath: "s/DROPBOX_HASH",
@@ -167,4 +167,43 @@ func TestGifSaveExtended(t *testing.T) {
 	assert.NotEqual(t, recordOne.SharedLink.UpdatedAt, oldTime2, "shared_link update times should differ")
 
 	tearDown()
+}
+
+func TestGifCount(t *testing.T) {
+	setUp()
+
+	count := Count()
+	assert.Equal(t, 0, count)
+
+	record := generateRecord(0, "abcd")
+	record.Create()
+
+	count = Count()
+	assert.Equal(t, 1, count)
+
+	record = generateRecord(0, "wxyz")
+	record.Create()
+
+	count = Count()
+	assert.Equal(t, 2, count)
+
+	tearDown()
+}
+
+func TestRecordString(t *testing.T) {
+	record := generateRecord(1989, "swift")
+
+	assert.Equal(t, "[1989] [taylor swift] swiftie life 'the best' - 02.gif (3.5 kB) [used: 1]", record.String())
+}
+
+func TestRecordURL(t *testing.T) {
+	record := generateRecord(1989, "swift")
+
+	assert.Equal(t, "https://dl.dropboxusercontent.com/s/DROPBOX_HASH/swiftie+life+%2527the+best%2527+-+02.gif", record.URL())
+}
+
+func TestRecordMarkdown(t *testing.T) {
+	record := generateRecord(1989, "swift")
+
+	assert.Equal(t, fmt.Sprintf("![%v](%v)", record.BaseName, record.URL()), record.Markdown())
 }

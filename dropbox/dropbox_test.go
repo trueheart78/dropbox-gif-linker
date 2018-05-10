@@ -53,7 +53,7 @@ func (t testConfig) LoadedPath() string {
 }
 
 var missingFile = "/gifs/def.gif"
-var existingFile = "/gifs/file name 1.gif"
+var existingFile = "/gifs/taylor swift/excited/file name 1.gif"
 var host = "https://example-api.com"
 var version = 3
 var client = Client{
@@ -263,6 +263,8 @@ func TestClientCreationSuccess(t *testing.T) {
 	assert.Equal(t, "https://dl.dropboxusercontent.com/s/DROPBOX_HASH/file+name+1.gif", url.DirectLink())
 	assert.Equal(t, fmt.Sprintf("![%v](%v)", url.Name, "https://dl.dropboxusercontent.com/s/DROPBOX_HASH/file+name+1.gif"), url.Markdown())
 	assert.Equal(t, "/s/DROPBOX_HASH", url.RemotePath())
+	assert.Equal(t, "/taylor swift/excited", url.Directory())
+	assert.Equal(t, "DROPBOX_ID", url.DropboxID())
 }
 
 func TestClientCreationExists(t *testing.T) {

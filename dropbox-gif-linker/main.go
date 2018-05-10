@@ -2,12 +2,14 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
 
+	humanize "github.com/dustin/go-humanize"
 	"github.com/trueheart78/dropbox-gif-linker/clipboard"
 	"github.com/trueheart78/dropbox-gif-linker/commands"
 	"github.com/trueheart78/dropbox-gif-linker/data"
@@ -70,15 +72,32 @@ func init() {
 	fmt.Println(messages.Welcome(version.Current))
 }
 
-func capture(link dropbox.Link) {
-	if link != (dropbox.Link{}) {
-		fmt.Println(mode)
+func convert(link dropbox.Link) (newGif gif.Record, err error) {
+	if link == (dropbox.Link{}) {
+		err = errors.New("invalid link")
+		return
+	}
+	newGif.BaseName = link.Name
+	newGif.Directory = link.Directory()
+	newGif.FileSize = link.FileSize
+	newGif.SharedLinkID = link.DropboxID()
+	newGif.SharedLink = gif.RecordSharedLink{
+		ID:         link.DropboxID(),
+		RemotePath: link.RemotePath(),
+		Count:      1,
+	}
+	return
+}
+
+func capture(gifRecord gif.Record) {
+	if gifRecord != (gif.Record{}) {
+		fmt.Println(messages.LinkTextNew(gifRecord.String()))
 		if md() {
-			clipboard.Write(link.Markdown())
-			fmt.Println(messages.LinkTextNew(link.Markdown()))
+			fmt.Println(messages.LinkTextNew(gifRecord.Markdown()))
+			clipboard.Write(gifRecord.Markdown())
 		} else {
-			clipboard.Write(link.DirectLink())
-			fmt.Println(messages.LinkTextNew(link.DirectLink()))
+			fmt.Println(messages.LinkTextNew(gifRecord.URL()))
+			clipboard.Write(gifRecord.URL())
 		}
 	}
 	// fmt.Println(messages.LinkTextOld(link.DirectLink()))
@@ -88,7 +107,8 @@ func configMessage() string {
 	config := "Current Config:\n"
 	config += fmt.Sprintf("- Path:      %v\n", dropboxClient.Config.LoadedPath())
 	config += fmt.Sprintf("- Gifs Path: %v\n", dropboxClient.Config.FullPath())
-	config += fmt.Sprintf("- Database:  %v\n", dropboxClient.Config.DatabasePath())
+	config += fmt.Sprintf("- Db Path:   %v\n", dropboxClient.Config.DatabasePath())
+	config += fmt.Sprintf("- Db Gifs:   %v\n", humanize.Comma(int64(gif.Count())))
 	config += fmt.Sprintf("- Token:     %v\n", dropboxClient.Config.Token())
 	return config
 }
@@ -98,7 +118,8 @@ func helpMessage() string {
 }
 
 func main() {
-	var link, cachedLink dropbox.Link
+	var link dropbox.Link
+	var gifRecord, gifRecordCached gif.Record
 	var input, cleaned string
 	var err error
 	var id int
@@ -115,11 +136,11 @@ func main() {
 		} else if commands.URLMode(input) {
 			mode = "url"
 			fmt.Println(messages.ModeShift("url"))
-			capture(link)
+			capture(gifRecord)
 		} else if commands.MarkdownMode(input) {
 			mode = "md"
 			fmt.Println(messages.ModeShift("md"))
-			capture(link)
+			capture(gifRecord)
 		} else if commands.Help(input) {
 			fmt.Println(messages.Help(helpMessage()))
 		} else if commands.Config(input) {
@@ -128,7 +149,7 @@ func main() {
 			gif.Connect()
 			id, err = handler.ID(input)
 			if err == nil {
-				fmt.Printf("Finding a gif for ID %d\n", id)
+				fmt.Printf("[Not Implemented]: Finding a gif for ID %d\n", id)
 				continue
 			} else {
 				cleaned, err = handler.Clean(input)
@@ -136,15 +157,21 @@ func main() {
 					fmt.Printf("Woops! %v\n", err.Error())
 					continue
 				}
-
-				cachedLink = link
 				link, err = dropboxClient.CreateLink(cleaned)
 				if err != nil {
-					link = cachedLink
 					fmt.Printf("Error creating link: %v\n", err.Error())
 					continue
 				}
-				capture(link)
+				if gifRecord != (gif.Record{}) {
+					gifRecordCached = gifRecord
+				}
+				gifRecord, err = convert(link)
+				if err != nil {
+					gifRecord = gifRecordCached
+					fmt.Printf("Error converting link: %v\n", err.Error())
+					continue
+				}
+				capture(gifRecord)
 			}
 			gif.Disconnect()
 		}

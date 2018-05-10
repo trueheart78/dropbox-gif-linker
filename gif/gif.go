@@ -3,11 +3,14 @@ package gif
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"path/filepath"
 	"time"
 
+	humanize "github.com/dustin/go-humanize"
 	// the adapter for sqlite3
 	_ "github.com/mattn/go-sqlite3"
 	homedir "github.com/mitchellh/go-homedir"
@@ -41,15 +44,15 @@ type Record struct {
 	ID           int64
 	BaseName     string
 	Directory    string
-	Size         int
+	FileSize     int
 	SharedLinkID string
 	CreatedAt    string
 	UpdatedAt    string
-	SharedLink   SharedLink
+	SharedLink   RecordSharedLink
 }
 
-// SharedLink details for a gif record
-type SharedLink struct {
+// RecordSharedLink details for a gif record
+type RecordSharedLink struct {
 	ID         string
 	GifID      int64
 	RemotePath string
@@ -61,6 +64,16 @@ type SharedLink struct {
 // matches the time format used by sqlite3: "2018-02-19 13:56:25.741308"
 func dbTime() string {
 	return time.Now().UTC().Format("2006-01-02 15:04:05.000000")
+}
+
+// Count returns the number of gifs cached in the database
+func Count() int {
+	var count int
+	err := db.QueryRow("SELECT COUNT(*) FROM gifs").Scan(&count)
+	if err != nil {
+		return 0
+	}
+	return count
 }
 
 // Find looks up a record by ID
@@ -94,7 +107,7 @@ func (r *Record) Update() (ok bool, err error) {
 
 	var affected, affected2 int64
 	var u sql.Result
-	u, err = stmt.Exec(r.BaseName, r.Directory, r.Size, r.SharedLinkID, dateString, r.ID)
+	u, err = stmt.Exec(r.BaseName, r.Directory, r.FileSize, r.SharedLinkID, dateString, r.ID)
 	if err != nil {
 		return
 	}
@@ -156,7 +169,7 @@ func (r *Record) Create() (ok bool, err error) {
 
 	var id int64
 	var u sql.Result
-	u, err = stmt.Exec(r.BaseName, r.Directory, r.Size, r.SharedLinkID, dateString, dateString)
+	u, err = stmt.Exec(r.BaseName, r.Directory, r.FileSize, r.SharedLinkID, dateString, dateString)
 	if err != nil {
 		return
 	}
@@ -191,6 +204,26 @@ func (r *Record) Create() (ok bool, err error) {
 
 	ok = true
 	return
+}
+
+// String returns a string formatted-Record
+func (r Record) String() string {
+	return fmt.Sprintf("[%d] [%v] %v (%v) [used: %d]", r.ID, r.Directory, r.BaseName, humanize.Bytes(uint64(r.FileSize)), r.SharedLink.Count)
+}
+
+// URL returns a publicly-accessible url
+func (r Record) URL() string {
+	u, err := url.Parse("https://dl.dropboxusercontent.com")
+	if err != nil {
+		return ""
+	}
+	u.Path = filepath.Join(r.SharedLink.RemotePath, url.QueryEscape(r.BaseName))
+	return u.String()
+}
+
+// Markdown returns a publicly-accessible markdown-based url
+func (r Record) Markdown() string {
+	return fmt.Sprintf("![%v](%v)", r.BaseName, r.URL())
 }
 
 // Init queues up the database connection
