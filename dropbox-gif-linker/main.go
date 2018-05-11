@@ -178,62 +178,66 @@ func main() {
 				break
 			}
 		} else {
+			// cache the gifRecord, then reset it
+			if gifRecord != (gif.Record{}) {
+				gifRecordCached = gifRecord
+			}
+			gifRecord = gif.Record{}
+
 			id, err = handler.ID(input)
 			if err == nil {
-				fmt.Printf("[Not Implemented]: Finding a gif for ID %d\n", id)
-				continue
-			} else {
-				// cache the gifRecord, then reset it
-				if gifRecord != (gif.Record{}) {
-					gifRecordCached = gifRecord
-				}
-				gifRecord = gif.Record{}
-
-				cleaned, err = handler.Clean(input)
-				if err != nil {
-					fmt.Printf("Woops! %v\n", err.Error())
-					continue
-				}
-
-				md5checksum, err = handler.MD5Checksum(cleaned)
-				// no err means we have a checksum we can lookup
-				if err == nil {
-					gifRecord, err = gif.FindByMD5Checksum(md5checksum)
-					if err == nil {
-						capture(gifRecord, true)
-						continue
-					}
-				}
-				shortFilename, err = dropboxClient.Truncate(cleaned)
-				if err != nil {
-					fmt.Printf("Error truncating filename: %v\n", err.Error())
-					continue
-				}
-				gifRecord, err = gif.FindByFilename(shortFilename)
+				gifRecord, err = gif.Find(int64(id))
 				if err == nil {
 					capture(gifRecord, true)
 					continue
 				} else {
-					link, err = dropboxClient.CreateLink(cleaned)
-					if err != nil {
-						fmt.Printf("Error creating link: %v\n", err.Error())
-						continue
-					}
-					gifRecord, err = convert(link, md5checksum)
-					if err != nil {
-						gifRecord = gifRecordCached
-						fmt.Printf("Error converting link: %v\n", err.Error())
-						continue
-					}
-					_, err := gifRecord.Save()
-					if err != nil {
-						gifRecord = gifRecordCached
-						fmt.Printf("Error saving gif: %v\n", err.Error())
-						continue
-					}
-
-					capture(gifRecord, false)
+					fmt.Printf("Woops! %v\n", err.Error())
 				}
+			}
+
+			cleaned, err = handler.Clean(input)
+			if err != nil {
+				fmt.Printf("Woops! %v\n", err.Error())
+				continue
+			}
+
+			md5checksum, err = handler.MD5Checksum(cleaned)
+			if err == nil {
+				gifRecord, err = gif.FindByMD5Checksum(md5checksum)
+				if err == nil {
+					capture(gifRecord, true)
+					continue
+				}
+			}
+			shortFilename, err = dropboxClient.Truncate(cleaned)
+			if err != nil {
+				fmt.Printf("Error truncating filename: %v\n", err.Error())
+				continue
+			}
+			gifRecord, err = gif.FindByFilename(shortFilename)
+			if err == nil {
+				capture(gifRecord, true)
+				continue
+			} else {
+				link, err = dropboxClient.CreateLink(cleaned)
+				if err != nil {
+					fmt.Printf("Error creating link: %v\n", err.Error())
+					continue
+				}
+				gifRecord, err = convert(link, md5checksum)
+				if err != nil {
+					gifRecord = gifRecordCached
+					fmt.Printf("Error converting link: %v\n", err.Error())
+					continue
+				}
+				_, err := gifRecord.Save()
+				if err != nil {
+					gifRecord = gifRecordCached
+					fmt.Printf("Error saving gif: %v\n", err.Error())
+					continue
+				}
+
+				capture(gifRecord, false)
 			}
 		}
 	}

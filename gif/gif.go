@@ -87,11 +87,12 @@ func Count() int {
 
 // Find looks up a record by ID
 func Find(id int64) (record Record, err error) {
+	var checksumData sql.NullString
 	err = db.QueryRow("SELECT g.*, s.* FROM gifs g LEFT JOIN shared_links s ON g.shared_link_id = s.id WHERE g.id = ?", id).Scan(&record.ID,
 		&record.BaseName,
 		&record.Directory,
 		&record.FileSize,
-		&record.Checksum,
+		&checksumData,
 		&record.SharedLinkID,
 		&record.CreatedAt,
 		&record.UpdatedAt,
@@ -101,6 +102,7 @@ func Find(id int64) (record Record, err error) {
 		&record.SharedLink.Count,
 		&record.SharedLink.CreatedAt,
 		&record.SharedLink.UpdatedAt)
+	record.Checksum = checksumData.String
 	if err == sql.ErrNoRows {
 		err = fmt.Errorf("no gif with ID %d", id)
 	}
@@ -109,11 +111,12 @@ func Find(id int64) (record Record, err error) {
 
 // FindByMD5Checksum looks up a record by the md5 checksum
 func FindByMD5Checksum(checksum string) (record Record, err error) {
+	var checksumData sql.NullString
 	err = db.QueryRow("SELECT g.*, s.* FROM gifs g LEFT JOIN shared_links s ON g.shared_link_id = s.id WHERE g.md5 = ?", checksum).Scan(&record.ID,
 		&record.BaseName,
 		&record.Directory,
 		&record.FileSize,
-		&record.Checksum,
+		&checksumData,
 		&record.SharedLinkID,
 		&record.CreatedAt,
 		&record.UpdatedAt,
@@ -123,6 +126,7 @@ func FindByMD5Checksum(checksum string) (record Record, err error) {
 		&record.SharedLink.Count,
 		&record.SharedLink.CreatedAt,
 		&record.SharedLink.UpdatedAt)
+	record.Checksum = checksumData.String
 	if err == sql.ErrNoRows {
 		err = fmt.Errorf("no gif with checksum %v", checksum)
 	}
@@ -131,6 +135,7 @@ func FindByMD5Checksum(checksum string) (record Record, err error) {
 
 // FindByFilename looks up the record by filename
 func FindByFilename(shortFilename string) (record Record, err error) {
+	var checksumData sql.NullString
 	basename := filepath.Base(shortFilename)
 	directory := strings.Replace(shortFilename, (string(os.PathSeparator) + basename), "", 1)
 	if !strings.HasPrefix(directory, string(os.PathSeparator)) {
@@ -141,7 +146,7 @@ func FindByFilename(shortFilename string) (record Record, err error) {
 		&record.BaseName,
 		&record.Directory,
 		&record.FileSize,
-		&record.Checksum,
+		&checksumData,
 		&record.SharedLinkID,
 		&record.CreatedAt,
 		&record.UpdatedAt,
@@ -151,6 +156,7 @@ func FindByFilename(shortFilename string) (record Record, err error) {
 		&record.SharedLink.Count,
 		&record.SharedLink.CreatedAt,
 		&record.SharedLink.UpdatedAt)
+	record.Checksum = checksumData.String
 	if err == sql.ErrNoRows {
 		err = fmt.Errorf("no gif with that directory/basename [%v/%v]", directory, basename)
 	}
