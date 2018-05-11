@@ -91,6 +91,10 @@ type LinkTag struct {
 // NewConfig attempts to load an existing configuration
 func NewConfig() (d Config, err error) {
 	fullConfig := configPath(configFilename)
+	if _, err = os.Stat(fullConfig); os.IsNotExist(err) {
+		err = fmt.Errorf("Please setup your config file [%v]", fullConfig)
+		return
+	}
 	d, err = createFromConfig(fullConfig)
 	if err != nil {
 		return
