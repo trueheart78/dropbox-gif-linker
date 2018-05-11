@@ -29,7 +29,24 @@ Download the respective binary for your system, open a terminal, and execute it.
 
 ### `dropbox-gif-linker`
 
-Handles talking to the DropBox API for you.
+Need the current version?
+
+```
+$ dropbox-gif-linker version
+dropbox-gif-linker version 0.80 darwin/amd64
+```
+
+Would you prefer to start in `markdown` mode?
+
+```
+$ dropbox-gif-linker md
+```
+
+Need to force it to start in `url` mode?
+
+```
+$ dropbox-gif-linker url
+```
 
 ![listener example](assets/images/listener-example.gif)
 

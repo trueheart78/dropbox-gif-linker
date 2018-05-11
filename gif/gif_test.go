@@ -191,6 +191,25 @@ func TestGifCount(t *testing.T) {
 	tearDown()
 }
 
+func TestGifRecordIncrement(t *testing.T) {
+	setUp()
+
+	record := generateRecord(0, "swift")
+	_, err := record.Increment()
+	assert.Nil(t, err)
+	assert.Equal(t, 1, record.SharedLink.Count)
+
+	_, err = record.Increment()
+	assert.Nil(t, err)
+	assert.Equal(t, 2, record.SharedLink.Count)
+
+	_, err = record.Increment()
+	assert.Nil(t, err)
+	assert.Equal(t, 3, record.SharedLink.Count)
+
+	tearDown()
+}
+
 func TestRecordString(t *testing.T) {
 	record := generateRecord(1989, "swift")
 

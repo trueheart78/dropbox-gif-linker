@@ -90,8 +90,11 @@ func convert(link dropbox.Link, checksum string) (newGif gif.Record, err error) 
 	return
 }
 
-func capture(gifRecord gif.Record) {
+func capture(gifRecord gif.Record, increment bool) {
 	if gifRecord != (gif.Record{}) {
+		if increment {
+			gifRecord.Increment()
+		}
 		fmt.Println(messages.LinkTextNew(gifRecord.String()))
 		if md() {
 			fmt.Println(messages.LinkTextNew(gifRecord.Markdown()))
@@ -124,11 +127,11 @@ func handleCommand(input string, gifRecord gif.Record) bool {
 	} else if commands.URLMode(input) {
 		mode = "url"
 		fmt.Println(messages.ModeShift("url"))
-		capture(gifRecord)
+		capture(gifRecord, false)
 	} else if commands.MarkdownMode(input) {
 		mode = "md"
 		fmt.Println(messages.ModeShift("md"))
-		capture(gifRecord)
+		capture(gifRecord, false)
 	} else if commands.Help(input) {
 		fmt.Println(messages.Help(helpMessage()))
 	} else if commands.Config(input) {
@@ -185,7 +188,7 @@ func main() {
 				if err == nil {
 					gifRecord, err = gif.FindByMD5Checksum(md5checksum)
 					if err == nil {
-						capture(gifRecord)
+						capture(gifRecord, true)
 						continue
 					}
 				}
@@ -196,7 +199,7 @@ func main() {
 				}
 				gifRecord, err := gif.FindByFilename(shortFilename)
 				if err == nil {
-					capture(gifRecord)
+					capture(gifRecord, true)
 					continue
 				} else {
 					link, err = dropboxClient.CreateLink(cleaned)
@@ -210,7 +213,14 @@ func main() {
 						fmt.Printf("Error converting link: %v\n", err.Error())
 						continue
 					}
-					capture(gifRecord)
+					_, err := gifRecord.Save()
+					if err != nil {
+						gifRecord = gifRecordCached
+						fmt.Printf("Error saving gif.Record: %v\n", err.Error())
+						continue
+					}
+
+					capture(gifRecord, false)
 				}
 			}
 		}

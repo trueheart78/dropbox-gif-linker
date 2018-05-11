@@ -88,21 +88,21 @@ func Count() int {
 
 // Find looks up a record by ID
 func Find(id int) (record Record, err error) {
-
+	fmt.Printf("[debug] finding record %d\n", id)
 	err = errors.New("construction")
 	return
 }
 
 // FindByMD5Checksum looks up a record by the md5 checksum
 func FindByMD5Checksum(checksum string) (record Record, err error) {
-
+	fmt.Printf("[debug] finding md5 %v\n", checksum)
 	err = errors.New("construction")
 	return
 }
 
 // FindByFilename looks up the record by filename
 func FindByFilename(shortFilename string) (record Record, err error) {
-
+	fmt.Printf("[debug] finding by filename %v\n", shortFilename)
 	err = errors.New("construction")
 	return
 }
@@ -210,7 +210,7 @@ func (r *Record) Create() (ok bool, err error) {
 		err = err2
 		return
 	}
-	_, err2 = stmt2.Exec(r.SharedLink.ID, id, r.SharedLink.RemotePath, r.SharedLink.Count, dateString, dateString)
+	_, err2 = stmt2.Exec(r.SharedLink.ID, id, r.SharedLink.RemotePath, 1, dateString, dateString)
 	if err2 != nil {
 		err = err2
 		return
@@ -224,10 +224,20 @@ func (r *Record) Create() (ok bool, err error) {
 	r.ID = id
 	r.CreatedAt = dateString
 	r.UpdatedAt = dateString
+	r.SharedLink.Count = 1
 	r.SharedLink.CreatedAt = dateString
 	r.SharedLink.UpdatedAt = dateString
 
 	ok = true
+	return
+}
+
+// Increment updates the Count value in memory and in the db
+func (r *Record) Increment() (ok bool, err error) {
+	if r.ID > 0 {
+		r.SharedLink.Count++
+	}
+	ok, err = r.Save()
 	return
 }
 
