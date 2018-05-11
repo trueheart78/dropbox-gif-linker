@@ -12,7 +12,7 @@ const (
 	Current = 1.0
 
 	// ReleaseCandidate version of the library
-	ReleaseCandidate = 1
+	ReleaseCandidate = 2
 )
 
 // Full returns the full version string
