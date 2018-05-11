@@ -25,10 +25,40 @@ func TestDataClean(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Equal(t, fmt.Sprintf("not a gif [%v]", badGif), err.Error())
 
+	badGif = "/sample/I\\'m not a gif"
+	data, err = h.Clean(badGif)
+	assert.NotNil(t, err)
+	assert.Equal(t, fmt.Sprintf("not a gif [%v]", data), err.Error())
+
 	badGif = "/sample/gif.gif gif.gif"
 	_, err = h.Clean(badGif)
 	assert.NotNil(t, err)
 	assert.Equal(t, fmt.Sprintf("multiple gifs detected in %v", badGif), err.Error())
+}
+
+func TestDataIsID(t *testing.T) {
+	id, err := h.ID("123")
+	assert.Equal(t, 123, id)
+	assert.Nil(t, err)
+
+	id, err = h.ID("    2345 ")
+	assert.Equal(t, 2345, id)
+	assert.Nil(t, err)
+
+	id, err = h.ID("\t12\n")
+	assert.Equal(t, 12, id)
+	assert.Nil(t, err)
+
+	id, err = h.ID("23 45 ")
+	assert.Equal(t, "not an id [23 45]", err.Error())
+	assert.NotNil(t, err)
+
+	id, err = h.ID("23.45 ")
+	assert.Equal(t, "not an id [23.45]", err.Error())
+	assert.NotNil(t, err)
+	id, err = h.ID("\t swift \t ")
+	assert.Equal(t, "not an id [swift]", err.Error())
+	assert.NotNil(t, err)
 }
 
 func TestDataIsGif(t *testing.T) {
@@ -53,6 +83,17 @@ func TestDataHasQuotes(t *testing.T) {
 	assert.False(t, h.hasQuotes("sample\""))
 	assert.False(t, h.hasQuotes("\"sample"))
 	assert.False(t, h.hasQuotes("'sample'"))
+}
+
+func TestDataMD5Checksum(t *testing.T) {
+	checksum, err := h.MD5Checksum("./fixtures/checksum_test.txt")
+
+	assert.Equal(t, "c187e44e837d8047f0c14e321d5266c4", checksum)
+	assert.Nil(t, err)
+
+	checksum, err = h.MD5Checksum("./fixtures/missing_file.txt")
+	assert.NotNil(t, err)
+	assert.Equal(t, "open ./fixtures/missing_file.txt: no such file or directory", err.Error())
 }
 
 func dirtyData() []string {

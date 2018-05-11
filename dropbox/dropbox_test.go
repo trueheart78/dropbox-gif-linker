@@ -39,9 +39,21 @@ func (t testConfig) Token() string {
 func (t testConfig) Valid() bool {
 	return t.valid
 }
+func (t testConfig) Environment() string {
+	return "test"
+}
+func (t testConfig) DatabasePath() string {
+	if t.Environment() != "" {
+		return fmt.Sprintf("%v/gifs-%v.sqlite3.db", filepath.Join(t.FullPath(), ".gifs"), t.Environment())
+	}
+	return fmt.Sprintf("%v/gifs.sqlite3.db", filepath.Join(t.FullPath(), ".gifs"))
+}
+func (t testConfig) LoadedPath() string {
+	return ""
+}
 
 var missingFile = "/gifs/def.gif"
-var existingFile = "/gifs/file name 1.gif"
+var existingFile = "/gifs/taylor swift/excited/file name 1.gif"
 var host = "https://example-api.com"
 var version = 3
 var client = Client{
@@ -106,14 +118,31 @@ func TestConfigLoad(t *testing.T) {
 	assert.False(d.Loaded)
 }
 
-func TestConfigGifDirFix(t *testing.T) {
+func TestConfigDatabasePath(t *testing.T) {
 	assert := assert.New(t)
 
+	// valid config
+	d := Config{}
+	d.load(validConfigFilename)
+
+	dbPath := filepath.Join(d.FullPath(), ".gifs", "gifs.sqlite3.db")
+	assert.Equal(dbPath, d.DatabasePath())
+}
+
+func TestConfigLoadedPath(t *testing.T) {
+	// valid config
+	d := Config{}
+	d.load(validConfigFilename)
+
+	assert.Equal(t, validConfigFilename, d.LoadedPath())
+}
+
+func TestConfigGifDirFix(t *testing.T) {
 	d := Config{GifDir: "example/"}
 
-	assert.Equal("example/", d.GifDir)
+	assert.Equal(t, "example/", d.GifDir)
 	d.gifDirFix()
-	assert.Equal("/example/", d.GifDir)
+	assert.Equal(t, "/example/", d.GifDir)
 }
 
 func TestConfigValidate(t *testing.T) {
@@ -158,12 +187,12 @@ func TestClientTruncate(t *testing.T) {
 	c := newClient(validConfig)
 
 	originalFilename := filepath.Join(validConfig.FullPath(), "example", "sample.gif")
-	truncatedFilename, err := c.truncate(originalFilename)
+	truncatedFilename, err := c.Truncate(originalFilename)
 
 	assert.Equal(t, "example/sample.gif", truncatedFilename)
 	assert.Nil(t, err)
 
-	_, err = c.truncate("invalid/dropbox/path.gif")
+	_, err = c.Truncate("invalid/dropbox/path.gif")
 	assert.Equal(t, fmt.Sprintf("filepath does not contain the dropbox path [%v]", fullPath), err.Error())
 	assert.NotNil(t, err)
 }
@@ -233,6 +262,9 @@ func TestClientCreationSuccess(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "https://dl.dropboxusercontent.com/s/DROPBOX_HASH/file+name+1.gif", url.DirectLink())
 	assert.Equal(t, fmt.Sprintf("![%v](%v)", url.Name, "https://dl.dropboxusercontent.com/s/DROPBOX_HASH/file+name+1.gif"), url.Markdown())
+	assert.Equal(t, "/s/DROPBOX_HASH", url.RemotePath())
+	assert.Equal(t, "/taylor swift/excited", url.Directory())
+	assert.Equal(t, "DROPBOX_ID", url.DropboxID())
 }
 
 func TestClientCreationExists(t *testing.T) {

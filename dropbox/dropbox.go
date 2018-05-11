@@ -38,6 +38,9 @@ type configInterface interface {
 	GifsPath() string
 	Token() string
 	Valid() bool
+	Environment() string
+	DatabasePath() string
+	LoadedPath() string
 }
 
 type existingPayload struct {
@@ -70,6 +73,7 @@ type Link struct {
 	ServerModified string          `json:"server_modified"`
 	Revision       string          `json:"rev"`
 	FileSize       int             `json:"size"`
+	GifsDir        string
 }
 
 // LinkPermissions are the permissions that Dropbox as assigned
@@ -119,8 +123,8 @@ func newClient(config configInterface) (c Client) {
 }
 
 func (c *Config) gifDirFix() {
-	if c.GifDir != "" && !strings.HasPrefix(c.GifDir, "/") {
-		c.GifDir = fmt.Sprintf("/%v", c.GifDir)
+	if c.GifDir != "" && !strings.HasPrefix(c.GifDir, string(os.PathSeparator)) {
+		c.GifDir = fmt.Sprintf("%v%v", string(os.PathSeparator), c.GifDir)
 	}
 }
 
@@ -144,12 +148,37 @@ func (c Config) GifsPath() string {
 	return ""
 }
 
+// DatabasePath provides the full path to the database file
+func (c Config) DatabasePath() string {
+	if !c.Valid() {
+		return ""
+	}
+	if c.Environment() == "test" {
+		wd, _ := os.Getwd()
+		return fmt.Sprintf("%v/%v.sqlite3.db", filepath.Join(wd, "../", "db"), c.Environment())
+	}
+	return fmt.Sprintf("%v/gifs.sqlite3.db", filepath.Join(c.FullPath(), ".gifs"))
+}
+
+// LoadedPath provides the full path to the loaded config file
+func (c Config) LoadedPath() string {
+	if !c.Valid() {
+		return ""
+	}
+	return c.Path
+}
+
 // Token returns the api token for use in API calls
 func (c Config) Token() string {
 	if c.Valid() {
 		return c.APIToken
 	}
 	return ""
+}
+
+// Environment returns the environment for the Config
+func (c Config) Environment() string {
+	return "development"
 }
 
 // Valid returns whether the config is valid
@@ -167,12 +196,12 @@ func (c Config) validate() (ok bool, err error) {
 		err = errors.New("the config is incomplete")
 		return
 	}
-	if !strings.HasPrefix(c.DropboxPath, "~/") && !strings.HasPrefix(c.DropboxPath, "/") {
+	if !strings.HasPrefix(c.DropboxPath, "~/") && !strings.HasPrefix(c.DropboxPath, string(os.PathSeparator)) {
 		err = fmt.Errorf("the dropbox_path should be \"/%v\" instead of \"%v\"", c.DropboxPath, c.DropboxPath)
 		return
 	}
-	if !strings.HasPrefix(c.GifDir, "/") {
-		err = fmt.Errorf("the dropbox_gif_dir should be \"/%v\" instead of \"%v\"", c.GifDir, c.GifDir)
+	if !strings.HasPrefix(c.GifDir, string(os.PathSeparator)) {
+		err = fmt.Errorf("the dropbox_gif_dir should be \"%v%v\" instead of \"%v\"", string(os.PathSeparator), c.GifDir, c.GifDir)
 		return
 	}
 	ok = true
@@ -235,7 +264,7 @@ func (c Client) basicRequest(fullURL string, payload bytes.Buffer) (result *http
 
 // CreateLink handles the filename and returns the Link object
 func (c Client) CreateLink(filename string) (link Link, err error) {
-	filename, err = c.truncate(filename)
+	filename, err = c.Truncate(filename)
 	if err != nil {
 		return
 	}
@@ -250,8 +279,8 @@ func (c Client) CreateLink(filename string) (link Link, err error) {
 	return
 }
 
-// removes the dropbox path from the filename
-func (c Client) truncate(filename string) (truncated string, err error) {
+// Truncate removes the full dropbox path from the filename
+func (c Client) Truncate(filename string) (truncated string, err error) {
 	if !strings.HasPrefix(filename, c.Config.FullPath()) {
 		err = fmt.Errorf("filepath does not contain the dropbox path [%v]", c.Config.FullPath())
 		return
@@ -287,8 +316,9 @@ func (c Client) exists(filename string) (link Link, err error) {
 		json.Unmarshal(rawBody, &exists)
 		if len(exists.Links) > 0 {
 			for _, l := range exists.Links {
-				if l.Path == filename {
+				if strings.ToLower(l.Path) == strings.ToLower(filename) {
 					link = l
+					link.GifsDir = c.Config.GifsPath()
 					return
 				}
 			}
@@ -324,6 +354,7 @@ func (c Client) create(filename string) (link Link, err error) {
 	defer result.Body.Close()
 	if err == nil {
 		json.Unmarshal(rawBody, &link)
+		link.GifsDir = c.Config.GifsPath()
 	}
 	return
 }
@@ -346,6 +377,28 @@ func (l Link) DirectLink() string {
 // Markdown returns the embeddable markdown string
 func (l Link) Markdown() string {
 	return fmt.Sprintf("![%v](%v)", l.Name, l.DirectLink())
+}
+
+// RemotePath returns the "s/DROPBOX_HASH"
+func (l Link) RemotePath() string {
+	u, err := url.Parse(l.URL)
+	if err != nil {
+		panic(err)
+	}
+	base := filepath.Base(u.Path)
+	return strings.Replace(u.Path, filepath.Join(string(os.PathSeparator), base), "", 1)
+}
+
+// Directory returns the directory path
+func (l Link) Directory() string {
+	directory := strings.Replace(l.Path, filepath.Join(string(os.PathSeparator), l.Name), "", 1)
+	directory = strings.Replace(directory, l.GifsDir, "", 1)
+	return directory
+}
+
+// DropboxID Returns the Dropbox ID
+func (l Link) DropboxID() string {
+	return strings.Replace(l.ID, "id:", "", 1)
 }
 
 func (c Client) fixFilename(filename string) string {
