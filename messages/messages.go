@@ -43,17 +43,17 @@ func InputError(err error) string {
 
 // LinkTextOld returns a properly formatted link
 func LinkTextOld(text string) string {
-	return color.White(fmt.Sprintf("%v", text))
+	return color.LightGreen(fmt.Sprintf("%v", text))
 }
 
 // LinkTextNew returns a properly formatted link
 func LinkTextNew(text string) string {
-	return color.LightYellow(fmt.Sprintf("%v", text))
+	return color.Green(fmt.Sprintf("%v", text))
 }
 
 // Help returns a properly formatted line of help text
 func Help(text string) string {
-	return color.LightYellow(fmt.Sprintf("%v\n", text))
+	return color.Green(fmt.Sprintf("%v\n", text))
 }
 
 func spacing() string {
@@ -65,5 +65,5 @@ func heart() string {
 }
 
 func note() string {
-	return color.Blue("♪")
+	return color.Red("♪")
 }
