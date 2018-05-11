@@ -264,7 +264,7 @@ func (c Client) basicRequest(fullURL string, payload bytes.Buffer) (result *http
 
 // CreateLink handles the filename and returns the Link object
 func (c Client) CreateLink(filename string) (link Link, err error) {
-	filename, err = c.truncate(filename)
+	filename, err = c.Truncate(filename)
 	if err != nil {
 		return
 	}
@@ -279,8 +279,8 @@ func (c Client) CreateLink(filename string) (link Link, err error) {
 	return
 }
 
-// removes the dropbox path from the filename
-func (c Client) truncate(filename string) (truncated string, err error) {
+// Truncate removes the full dropbox path from the filename
+func (c Client) Truncate(filename string) (truncated string, err error) {
 	if !strings.HasPrefix(filename, c.Config.FullPath()) {
 		err = fmt.Errorf("filepath does not contain the dropbox path [%v]", c.Config.FullPath())
 		return

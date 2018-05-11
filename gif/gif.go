@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	humanize "github.com/dustin/go-humanize"
@@ -33,6 +34,13 @@ func SetDatabasePath(filePath string) (ok bool, err error) {
 // GetDatabasePath returns the db path
 func GetDatabasePath() string {
 	return databasePath
+}
+
+func databaseDir() string {
+	if databasePath == "" {
+		return ""
+	}
+	return strings.Replace(databasePath, filepath.Base(databasePath), "", 1)
 }
 
 func resetDatabasePath() {
@@ -82,11 +90,16 @@ func Find(id int) (record Record, err error) {
 	return
 }
 
-// TODO: we need a way to parse the dropped in string to
-//       compare it to the database so we save trips to the
-//       dropbox api
-func xyz() bool {
-	return false
+// FindByMD5 looks up a record by the md5 checksum
+func FindByMD5(checksum string) (record Record, err error) {
+
+	return
+}
+
+// FindByFilename looks up the record by filename
+func FindByFilename(shortFilename string) (record Record, err error) {
+
+	return
 }
 
 // Save captures the record to the database
@@ -239,6 +252,9 @@ func Init() (ok bool, err error) {
 	if databasePath == "" {
 		err = errors.New("no database path set")
 		return
+	}
+	if _, err := os.Stat(databaseDir()); os.IsNotExist(err) {
+		os.MkdirAll(databaseDir(), os.ModePerm)
 	}
 	// connect to the database
 	_, err = Connect()

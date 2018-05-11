@@ -187,12 +187,12 @@ func TestClientTruncate(t *testing.T) {
 	c := newClient(validConfig)
 
 	originalFilename := filepath.Join(validConfig.FullPath(), "example", "sample.gif")
-	truncatedFilename, err := c.truncate(originalFilename)
+	truncatedFilename, err := c.Truncate(originalFilename)
 
 	assert.Equal(t, "example/sample.gif", truncatedFilename)
 	assert.Nil(t, err)
 
-	_, err = c.truncate("invalid/dropbox/path.gif")
+	_, err = c.Truncate("invalid/dropbox/path.gif")
 	assert.Equal(t, fmt.Sprintf("filepath does not contain the dropbox path [%v]", fullPath), err.Error())
 	assert.NotNil(t, err)
 }

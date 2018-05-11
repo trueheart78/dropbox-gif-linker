@@ -119,7 +119,7 @@ func helpMessage() string {
 func main() {
 	var link dropbox.Link
 	var gifRecord, gifRecordCached gif.Record
-	var input, cleaned string
+	var input, cleaned, shortFilename string
 	var err error
 	var id int
 	defer gif.Disconnect()
@@ -144,6 +144,10 @@ func main() {
 			fmt.Println(messages.Help(helpMessage()))
 		} else if commands.Config(input) {
 			fmt.Println(messages.Help(configMessage()))
+		} else if commands.Count(input) {
+			fmt.Println(messages.Help(humanize.Comma(int64(gif.Count())) + " total"))
+		} else if commands.Version(input) {
+			fmt.Println(messages.Help(version.Full()))
 		} else {
 			gif.Connect()
 			id, err = handler.ID(input)
@@ -156,21 +160,30 @@ func main() {
 					fmt.Printf("Woops! %v\n", err.Error())
 					continue
 				}
-				// TODO: let's check with the Gifs table to see if it already exists!
-
-				link, err = dropboxClient.CreateLink(cleaned)
+				// md5checksum = "md5abcdefg"
+				shortFilename, err = dropboxClient.Truncate(cleaned)
 				if err != nil {
-					fmt.Printf("Error creating link: %v\n", err.Error())
+					fmt.Printf("Error truncating filename: %v\n", err.Error())
 					continue
 				}
 				if gifRecord != (gif.Record{}) {
 					gifRecordCached = gifRecord
 				}
-				gifRecord, err = convert(link)
-				if err != nil {
-					gifRecord = gifRecordCached
-					fmt.Printf("Error converting link: %v\n", err.Error())
-					continue
+				gifRecord, err := gif.FindByFilename(shortFilename)
+				if err == nil {
+
+				} else {
+					link, err = dropboxClient.CreateLink(cleaned)
+					if err != nil {
+						fmt.Printf("Error creating link: %v\n", err.Error())
+						continue
+					}
+					gifRecord, err = convert(link)
+					if err != nil {
+						gifRecord = gifRecordCached
+						fmt.Printf("Error converting link: %v\n", err.Error())
+						continue
+					}
 				}
 				capture(gifRecord)
 			}
