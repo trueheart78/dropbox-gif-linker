@@ -27,6 +27,23 @@ In your home directory, make sure to create `.dgl.json` file, and fill in the de
 
 Download the respective binary for your system, open a terminal, and execute it.
 
+Then use a file manager to drag-and-drop a gif from your designated DropBox folder onto it, and press enter.
+
+If everthing goes well, you'll have a handy-dandy, publicly-shareable URL on your clipboard.
+
+Prefer some markdown? Just type in `md` and press enter. To get back, just type in `url`.
+
+Done with it? `exit` and `quit` are your friends 💖
+
+Other useful commands:
+
+- `config`
+- `count`
+- `version`
+
+
+Lost? Need help? Try `help`!
+
 ### `dropbox-gif-linker`
 
 Need the current version?
