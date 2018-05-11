@@ -88,6 +88,10 @@ func convert(link dropbox.Link, checksum string) (newGif gif.Record, err error) 
 	}
 	newGif.BaseName = link.Name
 	newGif.Directory = link.Directory()
+	if !strings.HasPrefix(newGif.Directory, string(os.PathSeparator)) {
+		newGif.Directory = fmt.Sprintf("%v%v", string(os.PathSeparator), newGif.Directory)
+	}
+	fmt.Println(newGif.Directory)
 	newGif.FileSize = link.FileSize
 	newGif.Checksum = checksum
 	newGif.SharedLinkID = link.DropboxID()
