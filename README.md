@@ -69,13 +69,4 @@ $ dropbox-gif-linker url
 
 ![taylor.gif](https://dl.dropboxusercontent.com/s/rhkozj2hwt82bc7/taylor.gif)
 
-### Drag and Drop
-
-Drag a file from your Dropbox gif directory into the terminal that your running this program in, and
-press enter to have it present a shareable link. You can also drag and drop multiple gif files at once.
-
-## :warning: Shared Gif Folder :warning:
-
-If you have shared your Dropbox gifs directory at its root, this program will not work as expected.
-
 [dropbox-new-app]: https://www.dropbox.com/developers/apps
