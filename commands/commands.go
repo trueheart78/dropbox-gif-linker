@@ -48,6 +48,34 @@ func Version(input string) bool {
 	return supported(input, versionCommands[:])
 }
 
+// Any returns true if the input is in any of the commands
+func Any(input string) bool {
+	var all []string
+	for _, v := range urlCommands {
+		all = append(all, v)
+	}
+	for _, v := range markdownCommands {
+		all = append(all, v)
+	}
+	for _, v := range helpCommands {
+		all = append(all, v)
+	}
+	for _, v := range versionCommands {
+		all = append(all, v)
+	}
+	for _, v := range countCommands {
+		all = append(all, v)
+	}
+	for _, v := range exitCommands {
+		all = append(all, v)
+	}
+	for _, v := range configCommands {
+		all = append(all, v)
+	}
+
+	return supported(input, all[:])
+}
+
 // HelpOutput outputs the entries for each command
 func HelpOutput() string {
 	output := "Supported Commands:\n"

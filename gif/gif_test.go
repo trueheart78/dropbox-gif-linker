@@ -38,6 +38,7 @@ func generateRecord(id int64, sharedID string) (r Record) {
 	}
 	r.BaseName = "swiftie life 'the best' - 02.gif"
 	r.Directory = "taylor swift"
+	r.Checksum = fmt.Sprintf("%vabcdefghijklmnopqrstuvxyz", sharedID)
 	r.FileSize = 3456
 	r.SharedLinkID = sharedID
 	r.SharedLink = RecordSharedLink{

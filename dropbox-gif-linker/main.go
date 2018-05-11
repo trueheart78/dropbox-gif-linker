@@ -72,7 +72,7 @@ func init() {
 	fmt.Println(messages.Welcome(version.Current))
 }
 
-func convert(link dropbox.Link) (newGif gif.Record, err error) {
+func convert(link dropbox.Link, checksum string) (newGif gif.Record, err error) {
 	if link == (dropbox.Link{}) {
 		err = errors.New("invalid link")
 		return
@@ -80,6 +80,7 @@ func convert(link dropbox.Link) (newGif gif.Record, err error) {
 	newGif.BaseName = link.Name
 	newGif.Directory = link.Directory()
 	newGif.FileSize = link.FileSize
+	newGif.Checksum = checksum
 	newGif.SharedLinkID = link.DropboxID()
 	newGif.SharedLink = gif.RecordSharedLink{
 		ID:         link.DropboxID(),
@@ -116,38 +117,50 @@ func helpMessage() string {
 	return fmt.Sprintf("Usage: Drag and drop a single gif at a time.\n\n%v", commands.HelpOutput())
 }
 
+func handleCommand(input string, gifRecord gif.Record) bool {
+	if commands.Exit(input) {
+		fmt.Println(messages.Goodbye())
+		return false
+	} else if commands.URLMode(input) {
+		mode = "url"
+		fmt.Println(messages.ModeShift("url"))
+		capture(gifRecord)
+	} else if commands.MarkdownMode(input) {
+		mode = "md"
+		fmt.Println(messages.ModeShift("md"))
+		capture(gifRecord)
+	} else if commands.Help(input) {
+		fmt.Println(messages.Help(helpMessage()))
+	} else if commands.Config(input) {
+		fmt.Println(messages.Help(configMessage()))
+	} else if commands.Count(input) {
+		fmt.Println(messages.Help(humanize.Comma(int64(gif.Count())) + " total"))
+	} else if commands.Version(input) {
+		fmt.Println(messages.Help(version.Full()))
+	}
+	return true
+}
+
 func main() {
 	var link dropbox.Link
 	var gifRecord, gifRecordCached gif.Record
-	var input, cleaned, shortFilename string
+	var input, cleaned, md5checksum, shortFilename string
 	var err error
 	var id int
+	var continueOn bool
 	defer gif.Disconnect()
 	reader := bufio.NewReader(os.Stdin)
 	handler := data.NewHandler()
 	for {
+		gif.Disconnect() // make sure we're always disconnected while awaiting input
 		fmt.Println(messages.AwaitingInput(mode))
 		input, _ = reader.ReadString('\n')
 		input = strings.Trim(strings.TrimSpace(input), "\"'")
-		if commands.Exit(input) {
-			fmt.Println(messages.Goodbye())
-			break
-		} else if commands.URLMode(input) {
-			mode = "url"
-			fmt.Println(messages.ModeShift("url"))
-			capture(gifRecord)
-		} else if commands.MarkdownMode(input) {
-			mode = "md"
-			fmt.Println(messages.ModeShift("md"))
-			capture(gifRecord)
-		} else if commands.Help(input) {
-			fmt.Println(messages.Help(helpMessage()))
-		} else if commands.Config(input) {
-			fmt.Println(messages.Help(configMessage()))
-		} else if commands.Count(input) {
-			fmt.Println(messages.Help(humanize.Comma(int64(gif.Count())) + " total"))
-		} else if commands.Version(input) {
-			fmt.Println(messages.Help(version.Full()))
+		if commands.Any(input) {
+			continueOn = handleCommand(input, gifRecord)
+			if !continueOn {
+				break
+			}
 		} else {
 			gif.Connect()
 			id, err = handler.ID(input)
@@ -155,39 +168,51 @@ func main() {
 				fmt.Printf("[Not Implemented]: Finding a gif for ID %d\n", id)
 				continue
 			} else {
+				// cache the gifRecord, then reset it
+				if gifRecord != (gif.Record{}) {
+					gifRecordCached = gifRecord
+				}
+				gifRecord = gif.Record{}
+
 				cleaned, err = handler.Clean(input)
 				if err != nil {
 					fmt.Printf("Woops! %v\n", err.Error())
 					continue
 				}
-				// md5checksum = "md5abcdefg"
+
+				md5checksum, err = handler.MD5Checksum(cleaned)
+				// no err means we have a checksum we can lookup
+				if err == nil {
+					gifRecord, err = gif.FindByMD5Checksum(md5checksum)
+					if err == nil {
+						capture(gifRecord)
+						continue
+					}
+				}
 				shortFilename, err = dropboxClient.Truncate(cleaned)
 				if err != nil {
 					fmt.Printf("Error truncating filename: %v\n", err.Error())
 					continue
 				}
-				if gifRecord != (gif.Record{}) {
-					gifRecordCached = gifRecord
-				}
 				gifRecord, err := gif.FindByFilename(shortFilename)
 				if err == nil {
-
+					capture(gifRecord)
+					continue
 				} else {
 					link, err = dropboxClient.CreateLink(cleaned)
 					if err != nil {
 						fmt.Printf("Error creating link: %v\n", err.Error())
 						continue
 					}
-					gifRecord, err = convert(link)
+					gifRecord, err = convert(link, md5checksum)
 					if err != nil {
 						gifRecord = gifRecordCached
 						fmt.Printf("Error converting link: %v\n", err.Error())
 						continue
 					}
+					capture(gifRecord)
 				}
-				capture(gifRecord)
 			}
-			gif.Disconnect()
 		}
 	}
 }

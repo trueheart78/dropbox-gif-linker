@@ -1,7 +1,11 @@
 package data
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
+	"io"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -51,5 +55,26 @@ func (h Handler) hasApostrophes(data string) bool {
 
 func (h Handler) hasQuotes(data string) bool {
 	return (strings.HasPrefix(data, "\"") && strings.HasSuffix(data, "\""))
+}
 
+// MD5Checksum returns the checksum for the passed file
+func (h Handler) MD5Checksum(filePath string) (string, error) {
+	var returnMD5String string
+
+	file, err := os.Open(filePath)
+	if err != nil {
+		return returnMD5String, err
+	}
+	defer file.Close()
+
+	hash := md5.New()
+	if _, err := io.Copy(hash, file); err != nil {
+		return returnMD5String, err
+	}
+
+	//Get the 16 bytes hash
+	hashInBytes := hash.Sum(nil)[:16]
+	returnMD5String = hex.EncodeToString(hashInBytes)
+
+	return returnMD5String, nil
 }

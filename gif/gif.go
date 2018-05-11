@@ -19,6 +19,7 @@ import (
 
 var db *sql.DB
 var databasePath string
+var connected bool
 
 // SetDatabasePath sets the db path
 func SetDatabasePath(filePath string) (ok bool, err error) {
@@ -53,6 +54,7 @@ type Record struct {
 	BaseName     string
 	Directory    string
 	FileSize     int
+	Checksum     string
 	SharedLinkID string
 	CreatedAt    string
 	UpdatedAt    string
@@ -87,18 +89,21 @@ func Count() int {
 // Find looks up a record by ID
 func Find(id int) (record Record, err error) {
 
+	err = errors.New("construction")
 	return
 }
 
-// FindByMD5 looks up a record by the md5 checksum
-func FindByMD5(checksum string) (record Record, err error) {
+// FindByMD5Checksum looks up a record by the md5 checksum
+func FindByMD5Checksum(checksum string) (record Record, err error) {
 
+	err = errors.New("construction")
 	return
 }
 
 // FindByFilename looks up the record by filename
 func FindByFilename(shortFilename string) (record Record, err error) {
 
+	err = errors.New("construction")
 	return
 }
 
@@ -119,7 +124,7 @@ func (r *Record) Update() (ok bool, err error) {
 	defer tx.Rollback()
 	dateString := dbTime()
 
-	stmt, err := tx.Prepare("UPDATE gifs SET basename = ?, directory = ?, size = ?, shared_link_id = ?, updated_at = ? WHERE id = ?")
+	stmt, err := tx.Prepare("UPDATE gifs SET basename = ?, directory = ?, size = ?, md5 = ?, shared_link_id = ?, updated_at = ? WHERE id = ?")
 	if err != nil {
 		return
 	}
@@ -127,7 +132,7 @@ func (r *Record) Update() (ok bool, err error) {
 
 	var affected, affected2 int64
 	var u sql.Result
-	u, err = stmt.Exec(r.BaseName, r.Directory, r.FileSize, r.SharedLinkID, dateString, r.ID)
+	u, err = stmt.Exec(r.BaseName, r.Directory, r.FileSize, r.Checksum, r.SharedLinkID, dateString, r.ID)
 	if err != nil {
 		return
 	}
@@ -181,7 +186,7 @@ func (r *Record) Create() (ok bool, err error) {
 	defer tx.Rollback()
 	dateString := dbTime()
 
-	stmt, err := tx.Prepare("INSERT INTO gifs (basename, directory, size, shared_link_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)")
+	stmt, err := tx.Prepare("INSERT INTO gifs (basename, directory, size, md5, shared_link_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		return
 	}
@@ -189,7 +194,7 @@ func (r *Record) Create() (ok bool, err error) {
 
 	var id int64
 	var u sql.Result
-	u, err = stmt.Exec(r.BaseName, r.Directory, r.FileSize, r.SharedLinkID, dateString, dateString)
+	u, err = stmt.Exec(r.BaseName, r.Directory, r.FileSize, r.Checksum, r.SharedLinkID, dateString, dateString)
 	if err != nil {
 		return
 	}
@@ -284,15 +289,17 @@ func Connect() (ok bool, err error) {
 	}
 	db, err = sql.Open("sqlite3", databasePath)
 	if err != nil {
+		connected = false
 		return
 	}
+	connected = true
 	ok = true
 	return
 }
 
 // Disconnect from the database connection
 func Disconnect() {
-	if db != nil {
+	if db != nil && connected {
 		db.Close()
 	}
 }

@@ -85,6 +85,17 @@ func TestDataHasQuotes(t *testing.T) {
 	assert.False(t, h.hasQuotes("'sample'"))
 }
 
+func TestDataMD5Checksum(t *testing.T) {
+	checksum, err := h.MD5Checksum("./fixtures/checksum_test.txt")
+
+	assert.Equal(t, "c187e44e837d8047f0c14e321d5266c4", checksum)
+	assert.Nil(t, err)
+
+	checksum, err = h.MD5Checksum("./fixtures/missing_file.txt")
+	assert.NotNil(t, err)
+	assert.Equal(t, "open ./fixtures/missing_file.txt: no such file or directory", err.Error())
+}
+
 func dirtyData() []string {
 	data := make([]string, 0)
 	data = append(data, "/path/to/file name.gif")

@@ -124,6 +124,16 @@ func TestVersion(t *testing.T) {
 	assert.False(Version("count"))
 }
 
+func TestAny(t *testing.T) {
+	assert.True(t, Any("url"))
+	assert.True(t, Any("md"))
+	assert.True(t, Any("help"))
+	assert.True(t, Any("exit"))
+	assert.True(t, Any("config"))
+	assert.True(t, Any("count"))
+	assert.True(t, Any("version"))
+}
+
 func TestSupported(t *testing.T) {
 	commands := [3]string{"no", "noway", "bogus"}
 
