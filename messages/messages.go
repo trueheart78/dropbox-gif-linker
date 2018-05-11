@@ -12,13 +12,13 @@ func Welcome(version float64, releaseCandidate int) string {
 	if releaseCandidate > 0 {
 		rc = fmt.Sprintf("-rc%d", releaseCandidate)
 	}
-	versionOutput := color.LightCyan(fmt.Sprintf("v%.1f%v", version, rc))
-	return fmt.Sprintf("%v %v %v %v", heart(), color.LightCyan("Welcome to Dropbox Gif Listener"), versionOutput, heart())
+	versionOutput := color.Blue(fmt.Sprintf("v%.1f%v", version, rc))
+	return fmt.Sprintf("%v %v %v %v", heart(), color.Blue("Welcome to Dropbox Gif Listener"), versionOutput, heart())
 }
 
 // Goodbye returns a properly formatted goodbye
 func Goodbye() string {
-	return fmt.Sprintf("%v %v %v", heart(), color.LightCyan("Goodbye"), heart())
+	return fmt.Sprintf("%v %v %v", heart(), color.Blue("Goodbye"), heart())
 }
 
 // AwaitingInput returns an informational message
@@ -28,12 +28,12 @@ func AwaitingInput(mode string) string {
 
 // CurrentMode returns the current mode
 func CurrentMode(mode string) string {
-	return fmt.Sprintf("%v%v %v %v", spacing(), note(), color.LightCyan(mode), note())
+	return fmt.Sprintf("%v%v %v %v", spacing(), note(), color.Blue(mode), note())
 }
 
 // ModeShift returns the mode shifted to
 func ModeShift(mode string) string {
-	return color.LightCyan(fmt.Sprintf("♪ mode shifted to %v ♪", mode))
+	return color.Blue(fmt.Sprintf("♪ mode shifted to %v ♪", mode))
 }
 
 // InputError returns a properly formatted error
@@ -43,17 +43,17 @@ func InputError(err error) string {
 
 // LinkTextOld returns a properly formatted link
 func LinkTextOld(text string) string {
-	return color.White(fmt.Sprintf("%v", text))
+	return color.LightGreen(fmt.Sprintf("%v", text))
 }
 
 // LinkTextNew returns a properly formatted link
 func LinkTextNew(text string) string {
-	return color.LightYellow(fmt.Sprintf("%v", text))
+	return color.Green(fmt.Sprintf("%v", text))
 }
 
 // Help returns a properly formatted line of help text
 func Help(text string) string {
-	return color.LightYellow(fmt.Sprintf("%v\n", text))
+	return color.Green(fmt.Sprintf("%v\n", text))
 }
 
 func spacing() string {
@@ -65,5 +65,5 @@ func heart() string {
 }
 
 func note() string {
-	return color.LightCyan("♪")
+	return color.Red("♪")
 }
