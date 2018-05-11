@@ -123,8 +123,8 @@ func newClient(config configInterface) (c Client) {
 }
 
 func (c *Config) gifDirFix() {
-	if c.GifDir != "" && !strings.HasPrefix(c.GifDir, "/") {
-		c.GifDir = fmt.Sprintf("/%v", c.GifDir)
+	if c.GifDir != "" && !strings.HasPrefix(c.GifDir, string(os.PathSeparator)) {
+		c.GifDir = fmt.Sprintf("%v%v", string(os.PathSeparator), c.GifDir)
 	}
 }
 
@@ -196,12 +196,12 @@ func (c Config) validate() (ok bool, err error) {
 		err = errors.New("the config is incomplete")
 		return
 	}
-	if !strings.HasPrefix(c.DropboxPath, "~/") && !strings.HasPrefix(c.DropboxPath, "/") {
+	if !strings.HasPrefix(c.DropboxPath, "~/") && !strings.HasPrefix(c.DropboxPath, string(os.PathSeparator)) {
 		err = fmt.Errorf("the dropbox_path should be \"/%v\" instead of \"%v\"", c.DropboxPath, c.DropboxPath)
 		return
 	}
-	if !strings.HasPrefix(c.GifDir, "/") {
-		err = fmt.Errorf("the dropbox_gif_dir should be \"/%v\" instead of \"%v\"", c.GifDir, c.GifDir)
+	if !strings.HasPrefix(c.GifDir, string(os.PathSeparator)) {
+		err = fmt.Errorf("the dropbox_gif_dir should be \"%v%v\" instead of \"%v\"", string(os.PathSeparator), c.GifDir, c.GifDir)
 		return
 	}
 	ok = true
@@ -386,12 +386,12 @@ func (l Link) RemotePath() string {
 		panic(err)
 	}
 	base := filepath.Base(u.Path)
-	return strings.Replace(u.Path, filepath.Join("/", base), "", 1)
+	return strings.Replace(u.Path, filepath.Join(string(os.PathSeparator), base), "", 1)
 }
 
 // Directory returns the directory path
 func (l Link) Directory() string {
-	directory := strings.Replace(l.Path, filepath.Join("/", l.Name), "", 1)
+	directory := strings.Replace(l.Path, filepath.Join(string(os.PathSeparator), l.Name), "", 1)
 	directory = strings.Replace(directory, l.GifsDir, "", 1)
 	return directory
 }

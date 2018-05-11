@@ -42,21 +42,25 @@ func clearScreen() {
 	}
 }
 
+func handleFirstArg(argument string) {
+	if os.Args[1] == "version" {
+		fmt.Println(version.Full())
+		os.Exit(0)
+	}
+
+	if os.Args[1] == "md" || os.Args[1] == "markdown" {
+		mode = "md"
+	}
+
+	if os.Args[1] == "url" {
+		mode = "url"
+	}
+}
+
 func init() {
 	var err error
 	if len(os.Args) >= 2 {
-		if os.Args[1] == "version" {
-			fmt.Println(version.Full())
-			os.Exit(0)
-		}
-
-		if os.Args[1] == "md" || os.Args[1] == "markdown" {
-			mode = "md"
-		}
-
-		if os.Args[1] == "url" {
-			mode = "url"
-		}
+		handleFirstArg(os.Args[1])
 	}
 
 	dropboxClient, err = dropbox.DefaultClient()
@@ -66,7 +70,11 @@ func init() {
 	}
 
 	gif.SetDatabasePath(dropboxClient.Config.DatabasePath())
-	gif.Init()
+	_, err = gif.Init()
+	if err != nil {
+		fmt.Printf("Error initiating database: %v", err.Error())
+		os.Exit(1)
+	}
 
 	clearScreen()
 	fmt.Println(messages.Welcome(version.Current))
@@ -103,6 +111,7 @@ func capture(gifRecord gif.Record, increment bool) {
 			fmt.Println(messages.LinkTextNew(gifRecord.URL()))
 			clipboard.Write(gifRecord.URL())
 		}
+		fmt.Println("")
 	}
 }
 
@@ -112,7 +121,7 @@ func configMessage() string {
 	config += fmt.Sprintf("- Gifs Path: %v\n", dropboxClient.Config.FullPath())
 	config += fmt.Sprintf("- Db Path:   %v\n", dropboxClient.Config.DatabasePath())
 	config += fmt.Sprintf("- Db Gifs:   %v\n", humanize.Comma(int64(gif.Count())))
-	config += fmt.Sprintf("- Token:     %v\n", dropboxClient.Config.Token())
+	config += fmt.Sprintf("- Token:     %v", dropboxClient.Config.Token())
 	return config
 }
 
@@ -159,13 +168,13 @@ func main() {
 		fmt.Println(messages.AwaitingInput(mode))
 		input, _ = reader.ReadString('\n')
 		input = strings.Trim(strings.TrimSpace(input), "\"'")
+		gif.Connect()
 		if commands.Any(input) {
 			continueOn = handleCommand(input, gifRecord)
 			if !continueOn {
 				break
 			}
 		} else {
-			gif.Connect()
 			id, err = handler.ID(input)
 			if err == nil {
 				fmt.Printf("[Not Implemented]: Finding a gif for ID %d\n", id)
@@ -197,7 +206,7 @@ func main() {
 					fmt.Printf("Error truncating filename: %v\n", err.Error())
 					continue
 				}
-				gifRecord, err := gif.FindByFilename(shortFilename)
+				gifRecord, err = gif.FindByFilename(shortFilename)
 				if err == nil {
 					capture(gifRecord, true)
 					continue
@@ -216,7 +225,7 @@ func main() {
 					_, err := gifRecord.Save()
 					if err != nil {
 						gifRecord = gifRecordCached
-						fmt.Printf("Error saving gif.Record: %v\n", err.Error())
+						fmt.Printf("Error saving gif: %v\n", err.Error())
 						continue
 					}
 

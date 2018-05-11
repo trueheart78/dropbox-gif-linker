@@ -37,7 +37,7 @@ func generateRecord(id int64, sharedID string) (r Record) {
 		r.UpdatedAt = dbTime()
 	}
 	r.BaseName = "swiftie life 'the best' - 02.gif"
-	r.Directory = "taylor swift"
+	r.Directory = "/taylor swift"
 	r.Checksum = fmt.Sprintf("%vabcdefghijklmnopqrstuvxyz", sharedID)
 	r.FileSize = 3456
 	r.SharedLinkID = sharedID
@@ -126,10 +126,10 @@ func TestGifCreate(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, int64(2), recordTwo.ID)
 
+	// we allow a single type of error
 	ok, err = recordThree.Create()
-	assert.False(t, ok)
-	assert.NotNil(t, err)
-	assert.Equal(t, "UNIQUE constraint failed: shared_links.id", err.Error())
+	assert.True(t, ok)
+	assert.Nil(t, err)
 
 	tearDown()
 }
@@ -210,10 +210,78 @@ func TestGifRecordIncrement(t *testing.T) {
 	tearDown()
 }
 
+func TestFind(t *testing.T) {
+	setUp()
+
+	record := generateRecord(0, "swift")
+	record.Save()
+
+	recordTwo, err := Find(record.ID)
+	assert.Nil(t, err)
+	assert.Equal(t, record.ID, recordTwo.ID)
+	assert.Equal(t, record.SharedLinkID, recordTwo.SharedLink.ID)
+
+	_, err = Find(1989)
+	assert.NotNil(t, err)
+	assert.Equal(t, "no gif with ID 1989", err.Error())
+
+	tearDown()
+}
+
+func TestFindByMD5Checksum(t *testing.T) {
+	setUp()
+
+	record := generateRecord(0, "swift")
+	record.Save()
+
+	recordTwo, err := FindByMD5Checksum(record.Checksum)
+	assert.Nil(t, err)
+	assert.Equal(t, record.ID, recordTwo.ID)
+	assert.Equal(t, record.SharedLinkID, recordTwo.SharedLink.ID)
+
+	_, err = FindByMD5Checksum("unused-checksum")
+	assert.NotNil(t, err)
+	assert.Equal(t, "no gif with checksum unused-checksum", err.Error())
+
+	tearDown()
+}
+
+func TestFindByFilename(t *testing.T) {
+	setUp()
+
+	record := generateRecord(0, "swift")
+	record.Save()
+
+	filename := filepath.Join(record.Directory, record.BaseName)
+	recordTwo, err := FindByFilename(filename)
+	assert.Nil(t, err)
+	assert.Equal(t, record.ID, recordTwo.ID)
+
+	filename = "/miss swift/no gif for swift.gif"
+	_, err = FindByFilename(filename)
+	assert.NotNil(t, err)
+	assert.Equal(t, fmt.Sprintf("no gif with that directory/basename [%v]", filename), err.Error())
+
+	tearDown()
+}
+
 func TestRecordString(t *testing.T) {
 	record := generateRecord(1989, "swift")
 
 	assert.Equal(t, "[1989] [taylor swift] swiftie life 'the best' - 02.gif (3.5 kB) [used: 1]", record.String())
+}
+
+func TestRecordTags(t *testing.T) {
+	record := Record{}
+
+	record.Directory = "/taylor swift/love story"
+	assert.Equal(t, "taylor swift, love story", record.Tags())
+
+	record.Directory = "/swift/love"
+	assert.Equal(t, "swift, love", record.Tags())
+
+	record.Directory = "/taylor swift"
+	assert.Equal(t, "taylor swift", record.Tags())
 }
 
 func TestRecordURL(t *testing.T) {

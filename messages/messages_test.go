@@ -44,12 +44,12 @@ func TestAwaitingInput(t *testing.T) {
 	assert := assert.New(t)
 
 	received := AwaitingInput("url")
-	expected := "\x1b[0;95mWaiting for input...\x1b[0m               \x1b[0;96m♪\x1b[0m \x1b[0;96murl\x1b[0m \x1b[0;96m♪\x1b[0m"
+	expected := "\x1b[0;31m♥\x1b[0m \x1b[0;95mWaiting for input\x1b[0m \x1b[0;31m♥\x1b[0m             \x1b[0;96m♪\x1b[0m \x1b[0;96murl\x1b[0m \x1b[0;96m♪\x1b[0m"
 
 	assert.Equal(expected, received)
 
 	received = AwaitingInput("md")
-	expected = "\x1b[0;95mWaiting for input...\x1b[0m               \x1b[0;96m♪\x1b[0m \x1b[0;96mmd\x1b[0m \x1b[0;96m♪\x1b[0m"
+	expected = "\x1b[0;31m♥\x1b[0m \x1b[0;95mWaiting for input\x1b[0m \x1b[0;31m♥\x1b[0m             \x1b[0;96m♪\x1b[0m \x1b[0;96mmd\x1b[0m \x1b[0;96m♪\x1b[0m"
 
 	assert.Equal(expected, received)
 }
@@ -58,7 +58,7 @@ func TestCurrentMode(t *testing.T) {
 	assert := assert.New(t)
 
 	received := CurrentMode("url")
-	expected := "               \x1b[0;96m♪\x1b[0m \x1b[0;96murl\x1b[0m \x1b[0;96m♪\x1b[0m"
+	expected := "             \x1b[0;96m♪\x1b[0m \x1b[0;96murl\x1b[0m \x1b[0;96m♪\x1b[0m"
 
 	assert.Equal(expected, received)
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 )
@@ -22,7 +23,9 @@ func NewHandler() Handler {
 // Clean cleans the input data
 func (h Handler) Clean(data string) (clean string, err error) {
 	clean = strings.TrimSpace(data)
-	clean = strings.Replace(clean, "\\", "", -1)
+	if runtime.GOOS != "windows" {
+		clean = strings.Replace(clean, "\\", "", -1)
+	}
 	if h.hasApostrophes(clean) || h.hasQuotes(clean) {
 		clean = clean[1 : len(clean)-1]
 	}

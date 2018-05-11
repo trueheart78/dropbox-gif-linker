@@ -19,7 +19,7 @@ func Goodbye() string {
 
 // AwaitingInput returns an informational message
 func AwaitingInput(mode string) string {
-	return fmt.Sprintf("%v%v", color.LightPurple("Waiting for input..."), CurrentMode(mode))
+	return fmt.Sprintf("%v %v %v%v", heart(), color.LightPurple("Waiting for input"), heart(), CurrentMode(mode))
 }
 
 // CurrentMode returns the current mode
@@ -49,11 +49,11 @@ func LinkTextNew(text string) string {
 
 // Help returns a properly formatted line of help text
 func Help(text string) string {
-	return color.LightYellow(fmt.Sprintf("%v", text))
+	return color.LightYellow(fmt.Sprintf("%v\n", text))
 }
 
 func spacing() string {
-	return "               "
+	return "             "
 }
 
 func heart() string {

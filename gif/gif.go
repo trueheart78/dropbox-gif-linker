@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -87,23 +86,74 @@ func Count() int {
 }
 
 // Find looks up a record by ID
-func Find(id int) (record Record, err error) {
-	fmt.Printf("[debug] finding record %d\n", id)
-	err = errors.New("construction")
+func Find(id int64) (record Record, err error) {
+	err = db.QueryRow("SELECT g.*, s.* FROM gifs g LEFT JOIN shared_links s ON g.shared_link_id = s.id WHERE g.id = ?", id).Scan(&record.ID,
+		&record.BaseName,
+		&record.Directory,
+		&record.FileSize,
+		&record.Checksum,
+		&record.SharedLinkID,
+		&record.CreatedAt,
+		&record.UpdatedAt,
+		&record.SharedLink.ID,
+		&record.SharedLink.GifID,
+		&record.SharedLink.RemotePath,
+		&record.SharedLink.Count,
+		&record.SharedLink.CreatedAt,
+		&record.SharedLink.UpdatedAt)
+	if err == sql.ErrNoRows {
+		err = fmt.Errorf("no gif with ID %d", id)
+	}
 	return
 }
 
 // FindByMD5Checksum looks up a record by the md5 checksum
 func FindByMD5Checksum(checksum string) (record Record, err error) {
-	fmt.Printf("[debug] finding md5 %v\n", checksum)
-	err = errors.New("construction")
+	err = db.QueryRow("SELECT g.*, s.* FROM gifs g LEFT JOIN shared_links s ON g.shared_link_id = s.id WHERE g.md5 = ?", checksum).Scan(&record.ID,
+		&record.BaseName,
+		&record.Directory,
+		&record.FileSize,
+		&record.Checksum,
+		&record.SharedLinkID,
+		&record.CreatedAt,
+		&record.UpdatedAt,
+		&record.SharedLink.ID,
+		&record.SharedLink.GifID,
+		&record.SharedLink.RemotePath,
+		&record.SharedLink.Count,
+		&record.SharedLink.CreatedAt,
+		&record.SharedLink.UpdatedAt)
+	if err == sql.ErrNoRows {
+		err = fmt.Errorf("no gif with checksum %v", checksum)
+	}
 	return
 }
 
 // FindByFilename looks up the record by filename
 func FindByFilename(shortFilename string) (record Record, err error) {
-	fmt.Printf("[debug] finding by filename %v\n", shortFilename)
-	err = errors.New("construction")
+	basename := filepath.Base(shortFilename)
+	directory := strings.Replace(shortFilename, (string(os.PathSeparator) + basename), "", 1)
+	if !strings.HasPrefix(directory, string(os.PathSeparator)) {
+		directory = fmt.Sprintf("%v%v", string(os.PathSeparator), directory)
+	}
+
+	err = db.QueryRow("SELECT g.*, s.* FROM gifs g LEFT JOIN shared_links s ON g.shared_link_id = s.id WHERE g.basename = ? AND g.directory = ?", basename, directory).Scan(&record.ID,
+		&record.BaseName,
+		&record.Directory,
+		&record.FileSize,
+		&record.Checksum,
+		&record.SharedLinkID,
+		&record.CreatedAt,
+		&record.UpdatedAt,
+		&record.SharedLink.ID,
+		&record.SharedLink.GifID,
+		&record.SharedLink.RemotePath,
+		&record.SharedLink.Count,
+		&record.SharedLink.CreatedAt,
+		&record.SharedLink.UpdatedAt)
+	if err == sql.ErrNoRows {
+		err = fmt.Errorf("no gif with that directory/basename [%v/%v]", directory, basename)
+	}
 	return
 }
 
@@ -210,10 +260,15 @@ func (r *Record) Create() (ok bool, err error) {
 		err = err2
 		return
 	}
+	var loadAndIncrement bool
 	_, err2 = stmt2.Exec(r.SharedLink.ID, id, r.SharedLink.RemotePath, 1, dateString, dateString)
 	if err2 != nil {
-		err = err2
-		return
+		// a duplicate here is ok
+		loadAndIncrement = true
+		if err2.Error() != "UNIQUE constraint failed: shared_links.id" {
+			err = err2
+			return
+		}
 	}
 	err2 = tx.Commit()
 	if err2 != nil {
@@ -221,12 +276,25 @@ func (r *Record) Create() (ok bool, err error) {
 		return
 	}
 
-	r.ID = id
-	r.CreatedAt = dateString
-	r.UpdatedAt = dateString
-	r.SharedLink.Count = 1
-	r.SharedLink.CreatedAt = dateString
-	r.SharedLink.UpdatedAt = dateString
+	if !loadAndIncrement {
+		r.ID = id
+		r.CreatedAt = dateString
+		r.UpdatedAt = dateString
+		r.SharedLink.Count = 1
+		r.SharedLink.CreatedAt = dateString
+		r.SharedLink.UpdatedAt = dateString
+	} else {
+		var loadedRecord Record
+		loadedRecord, err = Find(id)
+		if err != nil {
+			return
+		}
+		r = &loadedRecord
+		_, err = r.Increment()
+		if err != nil {
+			return
+		}
+	}
 
 	ok = true
 	return
@@ -243,7 +311,14 @@ func (r *Record) Increment() (ok bool, err error) {
 
 // String returns a string formatted-Record
 func (r Record) String() string {
-	return fmt.Sprintf("[%d] [%v] %v (%v) [used: %d]", r.ID, r.Directory, r.BaseName, humanize.Bytes(uint64(r.FileSize)), r.SharedLink.Count)
+	return fmt.Sprintf("[%d] [%v] %v (%v) [used: %d]", r.ID, r.Tags(), r.BaseName, humanize.Bytes(uint64(r.FileSize)), r.SharedLink.Count)
+}
+
+// Tags break down the directory
+func (r Record) Tags() string {
+	tags := strings.Replace(r.Directory, string(os.PathSeparator), "", 1)
+	tags = strings.Replace(tags, string(os.PathSeparator), ", ", -1)
+	return tags
 }
 
 // URL returns a publicly-accessible url
@@ -263,7 +338,6 @@ func (r Record) Markdown() string {
 
 // Init queues up the database connection
 func Init() (ok bool, err error) {
-	var structure string
 	if databasePath == "" {
 		err = errors.New("no database path set")
 		return
@@ -276,13 +350,8 @@ func Init() (ok bool, err error) {
 	if err != nil {
 		return
 	}
-	// load the structure sql
-	structure, err = structureStatement()
-	if err != nil {
-		return
-	}
 	// create the structure
-	_, err = db.Exec(structure)
+	_, err = db.Exec(structureStatements())
 	if err != nil {
 		return
 	}
@@ -327,23 +396,21 @@ func removeDatabase() (ok bool, err error) {
 	return
 }
 
-func structureStatement() (data string, err error) {
-	wd, err := os.Getwd()
-	if err != nil {
-		return
-	}
-	schemaPath := filepath.Join(wd, "../", "db", "schema.sql")
+func structureStatements() string {
+	return `
+-- gifs
+CREATE TABLE IF NOT EXISTS "gifs" ("id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "basename" varchar, "directory" varchar, "size" integer, "md5" varchar, "shared_link_id" varchar, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL);
+CREATE INDEX IF NOT EXISTS "index_gifs_on_shared_link_id" ON "gifs" ("shared_link_id");
+CREATE INDEX IF NOT EXISTS "index_gifs_on_md5" ON "gifs" ("md5");
+CREATE INDEX IF NOT EXISTS "index_gifs_on_basename_and_directory" ON "gifs" ("basename", "directory");
 
-	file, err := os.Open(schemaPath)
-	if err != nil {
-		return
-	}
-	defer file.Close()
-
-	bytes, err := ioutil.ReadAll(file)
-	if err != nil {
-		return
-	}
-	data = string(bytes)
-	return
+-- shared_links
+CREATE TABLE IF NOT EXISTS "shared_links" ("id" varchar NOT NULL PRIMARY KEY, "gif_id" integer, "remote_path" varchar, "count" integer DEFAULT 0, "created_at" datetime NOT NULL, "updated_at" datetime NOT NULL, CONSTRAINT "fk_golang_35031788c2"
+FOREIGN KEY ("gif_id")
+  REFERENCES "gifs" ("id")
+);
+CREATE INDEX IF NOT EXISTS "index_shared_links_on_id" ON "shared_links" ("id");
+CREATE INDEX IF NOT EXISTS "index_shared_links_on_gif_id" ON "shared_links" ("gif_id");
+CREATE INDEX IF NOT EXISTS "index_shared_links_on_count" ON "shared_links" ("count");
+	`
 }
