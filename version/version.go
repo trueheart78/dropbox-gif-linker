@@ -9,10 +9,17 @@ const (
 	// Library name
 	Library = "dropbox-gif-linker"
 	// Current version of the library
-	Current = 0.8
+	Current = 1.0
+
+	// ReleaseCandidate version of the library
+	ReleaseCandidate = 1
 )
 
 // Full returns the full version string
 func Full() string {
-	return fmt.Sprintf("%v version %.2f %v/%v", Library, Current, runtime.GOOS, runtime.GOARCH)
+	var rc string
+	if ReleaseCandidate > 0 {
+		rc = fmt.Sprintf("-rc%d", ReleaseCandidate)
+	}
+	return fmt.Sprintf("%v version %.1f%v %v/%v", Library, Current, rc, runtime.GOOS, runtime.GOARCH)
 }

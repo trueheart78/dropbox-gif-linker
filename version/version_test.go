@@ -8,11 +8,19 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSample(t *testing.T) {
-	assert.Equal(t, 0.8, Current)
+func TestLibrary(t *testing.T) {
+	assert.Equal(t, "dropbox-gif-linker", Library)
+}
+
+func TestCurrent(t *testing.T) {
+	assert.Equal(t, 1.0, Current)
+}
+
+func TestReleaseCandidate(t *testing.T) {
+	assert.Equal(t, 1, ReleaseCandidate)
 }
 
 func TestFullVersion(t *testing.T) {
-	expected := fmt.Sprintf("%v version %.2f %v/%v", Library, Current, runtime.GOOS, runtime.GOARCH)
+	expected := fmt.Sprintf("%v version %.1f-rc%d %v/%v", Library, Current, ReleaseCandidate, runtime.GOOS, runtime.GOARCH)
 	assert.Equal(t, expected, Full())
 }

@@ -15,6 +15,7 @@ func TestSupportedCommands(t *testing.T) {
 	assert.Equal(t, [2]string{"help", "?"}, helpCommands)
 	assert.Equal(t, [2]string{"config", "details"}, configCommands)
 	assert.Equal(t, [2]string{"count", "gifs"}, countCommands)
+	assert.Equal(t, [4]string{"taylor", "taylorswift", "taylor swift", "swiftie"}, taylorCommands)
 }
 
 func TestExit(t *testing.T) {
@@ -34,6 +35,7 @@ func TestExit(t *testing.T) {
 	assert.False(Exit("help"))
 	assert.False(Exit("count"))
 	assert.False(Exit("version"))
+	assert.False(Exit("taylor"))
 }
 
 func TestURLMode(t *testing.T) {
@@ -50,6 +52,7 @@ func TestURLMode(t *testing.T) {
 	assert.False(URLMode("help"))
 	assert.False(URLMode("count"))
 	assert.False(URLMode("version"))
+	assert.False(URLMode("taylor"))
 }
 
 func TestMarkdownMode(t *testing.T) {
@@ -66,6 +69,7 @@ func TestMarkdownMode(t *testing.T) {
 	assert.False(MarkdownMode("help"))
 	assert.False(MarkdownMode("count"))
 	assert.False(MarkdownMode("version"))
+	assert.False(MarkdownMode("taylor"))
 }
 
 func TestHelp(t *testing.T) {
@@ -82,6 +86,7 @@ func TestHelp(t *testing.T) {
 	assert.False(Help("config"))
 	assert.False(Help("count"))
 	assert.False(Help("version"))
+	assert.False(Help("taylor"))
 }
 
 func TestConfig(t *testing.T) {
@@ -96,6 +101,7 @@ func TestConfig(t *testing.T) {
 	assert.False(Config("exit"))
 	assert.False(Config("count"))
 	assert.False(Config("version"))
+	assert.False(Config("taylor"))
 }
 
 func TestCount(t *testing.T) {
@@ -109,6 +115,7 @@ func TestCount(t *testing.T) {
 	assert.False(Count("exit"))
 	assert.False(Count("config"))
 	assert.False(Count("version"))
+	assert.False(Count("taylor"))
 }
 
 func TestVersion(t *testing.T) {
@@ -122,6 +129,21 @@ func TestVersion(t *testing.T) {
 	assert.False(Version("exit"))
 	assert.False(Version("config"))
 	assert.False(Version("count"))
+	assert.False(Version("taylor"))
+}
+
+func TestTaylor(t *testing.T) {
+	assert := assert.New(t)
+
+	assert.True(Taylor("taylor"))
+
+	assert.False(Taylor("url"))
+	assert.False(Taylor("md"))
+	assert.False(Taylor("help"))
+	assert.False(Taylor("exit"))
+	assert.False(Taylor("config"))
+	assert.False(Taylor("count"))
+	assert.False(Taylor("version"))
 }
 
 func TestAny(t *testing.T) {
@@ -132,6 +154,7 @@ func TestAny(t *testing.T) {
 	assert.True(t, Any("config"))
 	assert.True(t, Any("count"))
 	assert.True(t, Any("version"))
+	assert.True(t, Any("taylor"))
 }
 
 func TestSupported(t *testing.T) {

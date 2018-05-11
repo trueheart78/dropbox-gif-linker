@@ -12,6 +12,7 @@ var configCommands = [2]string{"config", "details"}
 var countCommands = [2]string{"count", "gifs"}
 var helpCommands = [2]string{"help", "?"}
 var versionCommands = [2]string{"version", "v"}
+var taylorCommands = [4]string{"taylor", "taylorswift", "taylor swift", "swiftie"}
 
 // Exit returns true if the input is an exit command
 func Exit(input string) (exists bool) {
@@ -43,9 +44,14 @@ func Count(input string) bool {
 	return supported(input, countCommands[:])
 }
 
-// Version returns true if the input is a count command
+// Version returns true if the input is a version command
 func Version(input string) bool {
 	return supported(input, versionCommands[:])
+}
+
+// Taylor returns true if the input is a <3 Taylor Swift <3 command
+func Taylor(input string) bool {
+	return supported(input, taylorCommands[:])
 }
 
 // Any returns true if the input is in any of the commands
@@ -70,6 +76,9 @@ func Any(input string) bool {
 		all = append(all, v)
 	}
 	for _, v := range configCommands {
+		all = append(all, v)
+	}
+	for _, v := range taylorCommands {
 		all = append(all, v)
 	}
 

@@ -16,6 +16,7 @@ import (
 	"github.com/trueheart78/dropbox-gif-linker/dropbox"
 	"github.com/trueheart78/dropbox-gif-linker/gif"
 	"github.com/trueheart78/dropbox-gif-linker/messages"
+	"github.com/trueheart78/dropbox-gif-linker/taylor"
 	"github.com/trueheart78/dropbox-gif-linker/version"
 )
 
@@ -149,6 +150,8 @@ func handleCommand(input string, gifRecord gif.Record) bool {
 		fmt.Println(messages.Help(humanize.Comma(int64(gif.Count())) + " total"))
 	} else if commands.Version(input) {
 		fmt.Println(messages.Help(version.Full()))
+	} else if commands.Taylor(input) {
+		fmt.Println(taylor.HeadShot())
 	}
 	return true
 }
