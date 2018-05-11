@@ -17,8 +17,10 @@ func (e testError) Error() string {
 func TestWelcome(t *testing.T) {
 	assert := assert.New(t)
 
-	expected := "\x1b[0;31m♥\x1b[0m \x1b[0;96mWelcome to Dropbox Gif Listener\x1b[0m \x1b[0;96mv3.14\x1b[0m \x1b[0;31m♥\x1b[0m"
-	assert.Equal(expected, Welcome(3.14))
+	expected := "\x1b[0;31m♥\x1b[0m \x1b[0;96mWelcome to Dropbox Gif Listener\x1b[0m \x1b[0;96mv3.1-rc1\x1b[0m \x1b[0;31m♥\x1b[0m"
+	assert.Equal(expected, Welcome(3.1, 1))
+	expected = "\x1b[0;31m♥\x1b[0m \x1b[0;96mWelcome to Dropbox Gif Listener\x1b[0m \x1b[0;96mv0.8\x1b[0m \x1b[0;31m♥\x1b[0m"
+	assert.Equal(expected, Welcome(0.8, 0))
 }
 
 func TestGoodbye(t *testing.T) {

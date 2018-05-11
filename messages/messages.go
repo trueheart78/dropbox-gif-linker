@@ -7,8 +7,12 @@ import (
 )
 
 // Welcome returns a properly formatted greeting
-func Welcome(version float64) string {
-	versionOutput := color.LightCyan(fmt.Sprintf("v%.2f", version))
+func Welcome(version float64, releaseCandidate int) string {
+	var rc string
+	if releaseCandidate > 0 {
+		rc = fmt.Sprintf("-rc%d", releaseCandidate)
+	}
+	versionOutput := color.LightCyan(fmt.Sprintf("v%.1f%v", version, rc))
 	return fmt.Sprintf("%v %v %v %v", heart(), color.LightCyan("Welcome to Dropbox Gif Listener"), versionOutput, heart())
 }
 

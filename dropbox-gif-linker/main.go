@@ -78,7 +78,7 @@ func init() {
 	}
 
 	clearScreen()
-	fmt.Println(messages.Welcome(version.Current))
+	fmt.Println(messages.Welcome(version.Current, version.ReleaseCandidate))
 }
 
 func convert(link dropbox.Link, checksum string) (newGif gif.Record, err error) {
