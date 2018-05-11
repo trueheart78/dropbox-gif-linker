@@ -17,7 +17,7 @@ func TestCurrent(t *testing.T) {
 }
 
 func TestReleaseCandidate(t *testing.T) {
-	assert.Equal(t, 3, ReleaseCandidate)
+	assert.Equal(t, 4, ReleaseCandidate)
 }
 
 func TestFullVersion(t *testing.T) {
