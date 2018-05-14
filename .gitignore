@@ -3,7 +3,7 @@
 *.dll
 *.so
 *.dylib
-*.sqlite3.db
+*.db
 
 # Test binary, build with `go test -c`
 *.test
@@ -17,3 +17,6 @@
 # Releases
 release/
 out/
+
+# Database
+db/

@@ -2,6 +2,10 @@
 
 Designed to make working with your Dropbox gifs easier when wanting to share them.
 
+## Requirements
+
+Currently supports **macOS** 64bit only, and requires `sqlite3` to be installed.
+
 ## Dropbox Integration
 
 First, you need to create a new [Dropbox app][dropbox-new-app], using the **Dropbox API** (not the 
@@ -70,3 +74,4 @@ $ dropbox-gif-linker url
 ![taylor.gif](https://dl.dropboxusercontent.com/s/rhkozj2hwt82bc7/taylor.gif)
 
 [dropbox-new-app]: https://www.dropbox.com/developers/apps
+[osxcross]: https://github.com/tpoechtrager/osxcross

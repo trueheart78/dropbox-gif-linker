@@ -31,9 +31,9 @@ createRelease() {
   then
     osarch=64bit
   elif [ "$os" = linux ] && [ "$arch" = ppc64 ]
-        then
-                osarch=ppc64
-        else
+  then
+    osarch=ppc64
+  else
     osarch=32bit
   fi
 
@@ -74,6 +74,12 @@ createRelease() {
   fi
   cd ..
 }
+
+createRelease darwin amd64
+
+echo "Releases compiled"
+
+exit 0
 
 # Mac Releases
 createRelease darwin 386
