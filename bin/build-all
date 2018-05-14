@@ -24,7 +24,6 @@ createRelease() {
   if [ "$os" = darwin ]
   then
     osname='mac'
-    c_compiler='o64-clang'
   else
     osname=$os
   fi
@@ -53,7 +52,6 @@ createRelease() {
   if [ "$osname" = windows ]
   then
     binname="$binname.exe"
-    c_compiler='x86_64-w64-mingw32-gcc'
   fi
 
   relname="../release/$BINNAME-$osname-$osarch"
@@ -61,9 +59,9 @@ createRelease() {
 
   if [ "$arm" ]
   then
-    GOOS=$os GOARCH=$arch GOARM=$arm CGO_ENABLED=1 CC=$c_compiler go build -ldflags "$ldflags" -o "out/$binname" "$MAINGO"
+    GOOS=$os GOARCH=$arch GOARM=$arm go build -ldflags "$ldflags" -o "out/$binname" "$MAINGO"
   else
-    GOOS=$os GOARCH=$arch CGO_ENABLED=1 CC=$c_compiler go build -ldflags "$ldflags" -o "out/$binname" "$MAINGO"
+    GOOS=$os GOARCH=$arch go build -ldflags "$ldflags" -o "out/$binname" "$MAINGO"
   fi
 
   cd out
@@ -76,6 +74,12 @@ createRelease() {
   fi
   cd ..
 }
+
+createRelease darwin amd64
+
+echo "Releases compiled"
+
+exit 0
 
 # Mac Releases
 createRelease darwin 386
