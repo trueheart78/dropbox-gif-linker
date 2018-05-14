@@ -17,10 +17,14 @@ func TestCurrent(t *testing.T) {
 }
 
 func TestReleaseCandidate(t *testing.T) {
-	assert.Equal(t, 5, ReleaseCandidate)
+	assert.Equal(t, 0, ReleaseCandidate)
 }
 
 func TestFullVersion(t *testing.T) {
-	expected := fmt.Sprintf("%v version %.1f-rc%d %v/%v", Library, Current, ReleaseCandidate, runtime.GOOS, runtime.GOARCH)
+	var rc string
+	if ReleaseCandidate > 0 {
+		rc = fmt.Sprintf("-rc%d", ReleaseCandidate)
+	}
+	expected := fmt.Sprintf("%v version %.1f%v %v/%v", Library, Current, rc, runtime.GOOS, runtime.GOARCH)
 	assert.Equal(t, expected, Full())
 }
