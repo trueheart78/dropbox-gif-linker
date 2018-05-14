@@ -69,4 +69,11 @@ $ dropbox-gif-linker url
 
 ![taylor.gif](https://dl.dropboxusercontent.com/s/rhkozj2hwt82bc7/taylor.gif)
 
+## Compiling
+
+To compile for **Windows** from **Linux**, make sure to have `gcc-mingw-w64` installed.
+
+To compile for **MacOS** from **Linux**, see the [OS X Cross][osxcross] repository.
+
 [dropbox-new-app]: https://www.dropbox.com/developers/apps
+[osxcross]: https://github.com/tpoechtrager/osxcross
