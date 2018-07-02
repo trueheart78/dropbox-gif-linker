@@ -14,7 +14,7 @@ ARMVAR=github.com/trueheart78/dropbox-gif-linker/cmd.BuildARM
 BINNAME=${NAME:-dropbox-gif-linker}
 
 # main.go path
-MAINGO="dropbox-gif-linker/main.go"
+MAINGO="cmd/dropbox-gif-linker/dropbox-gif-linker.go"
 
 createRelease() {
   os=$1

@@ -73,5 +73,13 @@ $ dropbox-gif-linker url
 
 ![taylor.gif](https://dl.dropboxusercontent.com/s/rhkozj2hwt82bc7/taylor.gif)
 
+## Development
+
+Building the binaries?
+
+```
+build/package/binaries
+```
+
 [dropbox-new-app]: https://www.dropbox.com/developers/apps
 [osxcross]: https://github.com/tpoechtrager/osxcross
