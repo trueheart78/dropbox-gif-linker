@@ -10,14 +10,14 @@ import (
 	"strings"
 
 	humanize "github.com/dustin/go-humanize"
-	"github.com/trueheart78/dropbox-gif-linker/clipboard"
-	"github.com/trueheart78/dropbox-gif-linker/commands"
-	"github.com/trueheart78/dropbox-gif-linker/data"
-	"github.com/trueheart78/dropbox-gif-linker/dropbox"
-	"github.com/trueheart78/dropbox-gif-linker/gif"
-	"github.com/trueheart78/dropbox-gif-linker/messages"
-	"github.com/trueheart78/dropbox-gif-linker/taylor"
-	"github.com/trueheart78/dropbox-gif-linker/version"
+	"github.com/trueheart78/dropbox-gif-linker/internal/pkg/clipboard"
+	"github.com/trueheart78/dropbox-gif-linker/internal/pkg/commands"
+	"github.com/trueheart78/dropbox-gif-linker/internal/pkg/data"
+	"github.com/trueheart78/dropbox-gif-linker/internal/pkg/dropbox"
+	"github.com/trueheart78/dropbox-gif-linker/internal/pkg/gif"
+	"github.com/trueheart78/dropbox-gif-linker/internal/pkg/messages"
+	"github.com/trueheart78/dropbox-gif-linker/internal/pkg/taylor"
+	"github.com/trueheart78/dropbox-gif-linker/internal/pkg/version"
 )
 
 var dropboxClient dropbox.Client
