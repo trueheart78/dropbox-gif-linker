@@ -44,7 +44,7 @@ func clearScreen() {
 }
 
 func handleFirstArg(argument string) {
-	if os.Args[1] == "version" {
+	if os.Args[1] == "version" || os.Args[1] == "--version" {
 		fmt.Println(version.Full())
 		os.Exit(0)
 	}
@@ -86,6 +86,8 @@ func convert(link dropbox.Link, checksum string) (newGif gif.Record, err error) 
 		err = errors.New("invalid link")
 		return
 	}
+	// TODO: rewrite the capture for this into something relevant to the k/v store
+
 	newGif.BaseName = link.Name
 	newGif.Directory = link.Directory()
 	if !strings.HasPrefix(newGif.Directory, string(os.PathSeparator)) {
@@ -164,7 +166,6 @@ func main() {
 	var gifRecord, gifRecordCached gif.Record
 	var input, cleaned, md5checksum, shortFilename string
 	var err error
-	var id int
 	var continueOn bool
 	defer gif.Disconnect()
 	reader := bufio.NewReader(os.Stdin)
@@ -186,15 +187,6 @@ func main() {
 				gifRecordCached = gifRecord
 			}
 			gifRecord = gif.Record{}
-
-			id, err = handler.ID(input)
-			if err == nil {
-				gifRecord, err = gif.Find(int64(id))
-				if err == nil {
-					capture(gifRecord, true)
-					continue
-				}
-			}
 
 			cleaned, err = handler.Clean(input)
 			if err != nil {
