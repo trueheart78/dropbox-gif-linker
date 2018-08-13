@@ -194,6 +194,7 @@ func main() {
 				continue
 			}
 
+			// if the file pre-exists, load it
 			md5checksum, err = handler.MD5Checksum(cleaned)
 			if err == nil {
 				gifRecord, err = gif.FindByMD5Checksum(md5checksum)
@@ -202,27 +203,33 @@ func main() {
 					continue
 				}
 			}
+
 			shortFilename, err = dropboxClient.Truncate(cleaned)
 			if err != nil {
 				fmt.Printf("Error truncating filename: %v\n", err.Error())
 				continue
 			}
+
+			// if there is a filename representation, load it
 			gifRecord, err = gif.FindByFilename(shortFilename)
 			if err == nil {
 				capture(gifRecord, true)
 				continue
 			} else {
+				// create the actual public link via dropbox
 				link, err = dropboxClient.CreateLink(cleaned)
 				if err != nil {
 					fmt.Printf("Error creating link: %v\n", err.Error())
 					continue
 				}
+				// use the link and the checksum to create a gifRecord
 				gifRecord, err = convert(link, md5checksum)
 				if err != nil {
 					gifRecord = gifRecordCached
 					fmt.Printf("Error converting link: %v\n", err.Error())
 					continue
 				}
+				// save the gifRecord
 				_, err := gifRecord.Save()
 				if err != nil {
 					gifRecord = gifRecordCached
