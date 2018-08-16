@@ -65,7 +65,7 @@ Need to force it to start in `url` mode?
 $ dropbox-gif-linker url
 ```
 
-![listener example](assets/images/listener-example.gif)
+![listener example](assets/images/listener-example.gif?date=2018-08-16)
 
 ![taylor.gif][taylor heart]
 
