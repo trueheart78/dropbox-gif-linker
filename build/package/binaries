@@ -75,12 +75,6 @@ createRelease() {
   cd ..
 }
 
-createRelease darwin amd64
-
-echo "Releases compiled"
-
-exit 0
-
 # Mac Releases
 createRelease darwin 386
 createRelease darwin amd64
