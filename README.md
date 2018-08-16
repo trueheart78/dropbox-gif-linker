@@ -71,7 +71,7 @@ $ dropbox-gif-linker url
 
 ![listener example](assets/images/listener-example.gif)
 
-![taylor.gif](https://dl.dropboxusercontent.com/s/rhkozj2hwt82bc7/taylor.gif)
+![taylor.gif][taylor heart]
 
 ## Development
 
@@ -83,3 +83,4 @@ build/package/binaries
 
 [dropbox-new-app]: https://www.dropbox.com/developers/apps
 [osxcross]: https://github.com/tpoechtrager/osxcross
+[taylor heart]: https://dl.dropboxusercontent.com/s/rhkozj2hwt82bc7/heart+hand+-+taylor+swift.gif
