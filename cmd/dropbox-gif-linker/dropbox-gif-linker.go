@@ -220,7 +220,7 @@ func main() {
 				continue
 			}
 
-			capture(gifRecord, false)
+			capture(gifRecord, true)
 		}
 	}
 }
