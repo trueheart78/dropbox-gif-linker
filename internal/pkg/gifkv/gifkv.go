@@ -84,18 +84,6 @@ func Find(checksum string) (record Record, err error) {
 	return
 }
 
-// FindByFilename looks up the record by filename
-func FindByFilename(shortFilename string) (record Record, err error) {
-	basename := filepath.Base(shortFilename)
-	directory := strings.Replace(shortFilename, (string(os.PathSeparator) + basename), "", 1)
-	if !strings.HasPrefix(directory, string(os.PathSeparator)) {
-		directory = fmt.Sprintf("%v%v", string(os.PathSeparator), directory)
-	}
-
-	//	err = fmt.Errorf("no gif with that directory/basename [%v/%v]", directory, basename)
-	return
-}
-
 // Save captures the record to the database
 func (r *Record) Save() (bool, error) {
 	err := db.Update(func(tx *bolt.Tx) error {

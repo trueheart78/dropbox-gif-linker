@@ -42,7 +42,7 @@ func generateRecord(checksum string, sharedID string) (r Record) {
 	r.FileSize = 3456
 	r.SharedLinkID = sharedID
 	r.RemotePath = "s/DROPBOX_HASH"
-	r.Count = 0
+	r.Count = 1
 	return
 }
 
@@ -130,15 +130,15 @@ func TestGifRecordIncrement(t *testing.T) {
 	record := generateRecord("checksum-a", "swift")
 	_, err := record.Increment()
 	assert.Nil(t, err)
-	assert.Equal(t, 1, record.Count)
-
-	_, err = record.Increment()
-	assert.Nil(t, err)
 	assert.Equal(t, 2, record.Count)
 
 	_, err = record.Increment()
 	assert.Nil(t, err)
 	assert.Equal(t, 3, record.Count)
+
+	_, err = record.Increment()
+	assert.Nil(t, err)
+	assert.Equal(t, 4, record.Count)
 
 	tearDown()
 }
@@ -164,7 +164,7 @@ func TestGifFind(t *testing.T) {
 func TestGifRecordString(t *testing.T) {
 	record := generateRecord("1989", "swift")
 
-	assert.Equal(t, "[1989] [taylor swift] swiftie life 'the best' - 02.gif (3.5 kB) [used: 0]", record.String())
+	assert.Equal(t, "[1989] [taylor swift] swiftie life 'the best' - 02.gif (3.5 kB) [used: 1]", record.String())
 }
 
 func TestGifRecordTags(t *testing.T) {
