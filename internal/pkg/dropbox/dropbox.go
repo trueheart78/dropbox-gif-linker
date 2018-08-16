@@ -159,9 +159,9 @@ func (c Config) DatabasePath() string {
 	}
 	if c.Environment() == "test" {
 		wd, _ := os.Getwd()
-		return fmt.Sprintf("%v/%v.sqlite3.db", filepath.Join(wd, "../", "db"), c.Environment())
+		return fmt.Sprintf("%v/%v.bolt.db", filepath.Join(wd, "../", "db"), c.Environment())
 	}
-	return fmt.Sprintf("%v/gifs.sqlite3.db", filepath.Join(c.FullPath(), ".gifs"))
+	return fmt.Sprintf("%v/gifs.bolt.db", filepath.Join(c.FullPath(), ".gifs"))
 }
 
 // LoadedPath provides the full path to the loaded config file
