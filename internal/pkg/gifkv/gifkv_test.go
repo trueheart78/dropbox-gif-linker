@@ -164,7 +164,8 @@ func TestGifFind(t *testing.T) {
 func TestGifRecordString(t *testing.T) {
 	record := generateRecord("1989", "swift")
 
-	assert.Equal(t, "[taylor swift] swiftie life 'the best' - 02.gif (3.5 kB) [used: 1]", record.String())
+	// assert.Equal(t, "[taylor swift] swiftie life 'the best' - 02.gif (3.5 kB) [used: 1]", record.String())
+	assert.Equal(t, "[taylor swift] swiftie life 'the best' - 02.gif (3.5 kB)", record.String())
 }
 
 func TestGifRecordTags(t *testing.T) {

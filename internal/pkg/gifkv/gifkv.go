@@ -110,7 +110,7 @@ func (r Record) json() []byte {
 
 // String returns a string formatted-Record
 func (r Record) String() string {
-	return fmt.Sprintf("[%v] %v (%v) [used: %d]", r.Tags(), r.BaseName, humanize.Bytes(uint64(r.FileSize)), r.Count)
+	return fmt.Sprintf("[%v] %v (%v)", r.Tags(), r.BaseName, humanize.Bytes(uint64(r.FileSize)))
 }
 
 // Tags break down the directory

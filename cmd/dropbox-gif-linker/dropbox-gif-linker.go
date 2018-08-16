@@ -157,8 +157,8 @@ func handleCommand(input string, gifRecord gifkv.Record) bool {
 
 func main() {
 	var link dropbox.Link
-	var gifRecord, gifRecordCached gifkv.Record
-	var input, cleaned, md5checksum string
+	var gifRecord gifkv.Record
+	var input, cleaned, md5checksum, cachedChecksum string
 	var err error
 	var continueOn bool
 	defer gifkv.Disconnect()
@@ -176,9 +176,9 @@ func main() {
 				break
 			}
 		} else {
-			// cache the gifRecord, then reset it
+			// cache the gifRecord checksum, then reset it
 			if gifRecord != (gifkv.Record{}) {
-				gifRecordCached = gifRecord
+				cachedChecksum = gifRecord.ID
 			}
 			gifRecord = gifkv.Record{}
 
@@ -198,24 +198,24 @@ func main() {
 				}
 			}
 
-			// if there is a filename representation, load it
 			// create the actual public link via dropbox
 			link, err = dropboxClient.CreateLink(cleaned)
 			if err != nil {
+				gifRecord, _ = gifkv.Find(cachedChecksum)
 				fmt.Printf("Error creating link: %v\n", err.Error())
 				continue
 			}
 			// use the link and the checksum to create a gifRecord
 			gifRecord, err = convert(link, md5checksum)
 			if err != nil {
-				gifRecord = gifRecordCached
+				gifRecord, _ = gifkv.Find(cachedChecksum)
 				fmt.Printf("Error converting link: %v\n", err.Error())
 				continue
 			}
 			// save the gifRecord
 			_, err := gifRecord.Save()
 			if err != nil {
-				gifRecord = gifRecordCached
+				gifRecord, _ = gifkv.Find(cachedChecksum)
 				fmt.Printf("Error saving gif: %v\n", err.Error())
 				continue
 			}
