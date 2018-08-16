@@ -44,9 +44,9 @@ func (t testConfig) Environment() string {
 }
 func (t testConfig) DatabasePath() string {
 	if t.Environment() != "" {
-		return fmt.Sprintf("%v/gifs-%v.sqlite3.db", filepath.Join(t.FullPath(), ".gifs"), t.Environment())
+		return fmt.Sprintf("%v/gifs-%v.bolt.db", filepath.Join(t.FullPath(), ".gifs"), t.Environment())
 	}
-	return fmt.Sprintf("%v/gifs.sqlite3.db", filepath.Join(t.FullPath(), ".gifs"))
+	return fmt.Sprintf("%v/gifs.bolt.db", filepath.Join(t.FullPath(), ".gifs"))
 }
 func (t testConfig) LoadedPath() string {
 	return ""
@@ -125,7 +125,7 @@ func TestConfigDatabasePath(t *testing.T) {
 	d := Config{}
 	d.load(validConfigFilename)
 
-	dbPath := filepath.Join(d.FullPath(), ".gifs", "gifs.sqlite3.db")
+	dbPath := filepath.Join(d.FullPath(), ".gifs", "gifs.bolt.db")
 	assert.Equal(dbPath, d.DatabasePath())
 }
 
