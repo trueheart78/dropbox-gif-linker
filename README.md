@@ -50,7 +50,7 @@ Need the current version?
 
 ```
 $ dropbox-gif-linker version
-dropbox-gif-linker version 0.80 darwin/amd64
+dropbox-gif-linker version 1.1 darwin/amd64
 ```
 
 Would you prefer to start in `markdown` mode?
