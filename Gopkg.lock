@@ -12,6 +12,12 @@
   revision = "4c02eff8a28c1add99b3b5b238c165056c3bea8e"
 
 [[projects]]
+  name = "github.com/coreos/bbolt"
+  packages = ["."]
+  revision = "48ea1b39c25fc1bab3506fbc712ecbaa842c4d2d"
+  version = "v1.3.1-coreos.6"
+
+[[projects]]
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
@@ -21,12 +27,6 @@
   name = "github.com/dustin/go-humanize"
   packages = ["."]
   revision = "02af3965c54e8cacf948b97fef38925c4120652c"
-
-[[projects]]
-  name = "github.com/mattn/go-sqlite3"
-  packages = ["."]
-  revision = "6c771bb9887719704b210e87e934f08be014bdb1"
-  version = "v1.6.0"
 
 [[projects]]
   name = "github.com/mitchellh/go-homedir"
@@ -45,9 +45,15 @@
   revision = "12b6f73e6084dad08a7c6e575284b177ecafbc71"
   version = "v1.2.1"
 
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/sys"
+  packages = ["unix"]
+  revision = "1a700e749ce29638d0bbcb531cce1094ea096bd3"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "cb70fc0d853a5b573d1bd97c2bcc970bd7a6ed3ac2672986e2f64a018aeaa392"
+  inputs-digest = "390f90a67128dc38cd70d2e39485ce1b5fda7d61f85f6fb234055bbdf17808db"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -38,8 +38,8 @@
   revision = "02af3965c54e8cacf948b97fef38925c4120652c"
 
 [[constraint]]
-  name = "github.com/mattn/go-sqlite3"
-  version = "1.6.0"
+  name = "github.com/coreos/bbolt"
+  version = "v1.3.1-coreos.6"
 
 [[constraint]]
   # branch = "master"
