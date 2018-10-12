@@ -79,4 +79,4 @@ build/package/binaries
 
 [dropbox-new-app]: https://www.dropbox.com/developers/apps
 [osxcross]: https://github.com/tpoechtrager/osxcross
-[taylor heart]: https://dl.dropboxusercontent.com/s/rhkozj2hwt82bc7/heart+hand+-+taylor+swift.gif
+[taylor heart]: assets/images/ts-heart-hands.gif
