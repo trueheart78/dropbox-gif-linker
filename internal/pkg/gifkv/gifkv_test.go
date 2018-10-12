@@ -42,7 +42,6 @@ func generateRecord(checksum string, sharedID string) (r Record) {
 	r.FileSize = 3456
 	r.SharedLinkID = sharedID
 	r.RemotePath = "s/DROPBOX_HASH"
-	r.Count = 1
 	return
 }
 
@@ -90,55 +89,47 @@ func TestGifSave(t *testing.T) {
 	recordOne := generateRecord("checksum-a", "abcd")
 	recordTwo := generateRecord("checksum-b", "efgh")
 
+	assert.False(t, recordOne.Persisted())
+	assert.False(t, recordTwo.Persisted())
+
 	ok, err := recordOne.Save()
 	assert.True(t, ok)
 	assert.Nil(t, err)
 	assert.Equal(t, "checksum-a", recordOne.ID)
+	assert.True(t, recordOne.Persisted())
 
 	ok, err = recordTwo.Save()
 	assert.True(t, ok)
 	assert.Nil(t, err)
 	assert.Equal(t, "checksum-b", recordTwo.ID)
+	assert.True(t, recordTwo.Persisted())
 
 	tearDown()
 }
 
-func TestGifCount(t *testing.T) {
+func TestGifDelete(t *testing.T) {
 	setUp()
 
-	count := Count()
-	assert.Equal(t, 0, count)
+	recordOne := generateRecord("checksum-a", "abcd")
+	recordTwo := generateRecord("checksum-b", "efgh")
 
-	record := generateRecord("checksum-a", "abcd")
-	record.Save()
-
-	count = Count()
-	assert.Equal(t, 1, count)
-
-	record = generateRecord("checksum-b", "wxyz")
-	record.Save()
-
-	count = Count()
-	assert.Equal(t, 2, count)
-
-	tearDown()
-}
-
-func TestGifRecordIncrement(t *testing.T) {
-	setUp()
-
-	record := generateRecord("checksum-a", "swift")
-	_, err := record.Increment()
+	ok, err := recordOne.Save()
+	assert.True(t, ok)
 	assert.Nil(t, err)
-	assert.Equal(t, 2, record.Count)
+	assert.Equal(t, "checksum-a", recordOne.ID)
+	assert.True(t, recordOne.Persisted())
 
-	_, err = record.Increment()
+	ok, err = recordOne.Delete()
+	assert.False(t, recordOne.Persisted())
+	assert.True(t, ok)
 	assert.Nil(t, err)
-	assert.Equal(t, 3, record.Count)
+	assert.Equal(t, "checksum-a", recordOne.ID)
 
-	_, err = record.Increment()
+	ok, err = recordTwo.Delete()
+	assert.True(t, ok)
 	assert.Nil(t, err)
-	assert.Equal(t, 4, record.Count)
+	assert.Equal(t, "checksum-b", recordTwo.ID)
+	assert.False(t, recordOne.Persisted())
 
 	tearDown()
 }
@@ -153,6 +144,7 @@ func TestGifFind(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, record.ID, recordTwo.ID)
 	assert.Equal(t, record.SharedLinkID, recordTwo.SharedLinkID)
+	assert.True(t, recordTwo.Persisted())
 
 	_, err = Find("1989")
 	assert.NotNil(t, err)
