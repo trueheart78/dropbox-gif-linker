@@ -5,10 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
-	"runtime"
 	"strings"
 
+	clear "github.com/dmowcomber/go-clear"
 	humanize "github.com/dustin/go-humanize"
 	"github.com/trueheart78/dropbox-gif-linker/internal/pkg/clipboard"
 	"github.com/trueheart78/dropbox-gif-linker/internal/pkg/commands"
@@ -29,18 +28,6 @@ func url() bool {
 
 func md() bool {
 	return mode == "md"
-}
-
-func clearScreen() {
-	if runtime.GOOS == "windows" {
-		cmd := exec.Command("cmd", "/c", "cls")
-		cmd.Stdout = os.Stdout
-		cmd.Run()
-	} else {
-		cmd := exec.Command("clear")
-		cmd.Stdout = os.Stdout
-		cmd.Run()
-	}
 }
 
 func handleFirstArg(argument string) {
@@ -77,7 +64,7 @@ func init() {
 		os.Exit(1)
 	}
 
-	clearScreen()
+	clear.Clear()
 	fmt.Println(messages.Welcome(version.Current, version.ReleaseCandidate))
 }
 
