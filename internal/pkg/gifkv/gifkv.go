@@ -55,7 +55,7 @@ type Record struct {
 	FileSize     int    `json:"file_size"`
 	SharedLinkID string `json:"shared_link_id"`
 	RemotePath   string `json:"remote_path"`
-	Count        int    `json:"count"`
+	persisted    bool
 }
 
 // Count returns the number of gifs cached in the database
@@ -76,6 +76,7 @@ func Find(checksum string) (record Record, err error) {
 		v := b.Get([]byte(checksum))
 		if v != nil {
 			json.Unmarshal(v, &record)
+			record.persisted = true
 		} else {
 			return fmt.Errorf("Unable to find id \"%s\"", checksum)
 		}
@@ -94,13 +95,22 @@ func (r *Record) Save() (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	r.persisted = true
 	return true, nil
 }
 
-// Increment updates the Count value in memory and in the db
-func (r *Record) Increment() (bool, error) {
-	r.Count++
-	return r.Save()
+// Delete removes the record from the database
+func (r *Record) Delete() (bool, error) {
+	err := db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(bucketName))
+		err := b.Delete([]byte(r.ID))
+		return err
+	})
+	if err != nil {
+		return false, err
+	}
+	r.persisted = false
+	return true, nil
 }
 
 func (r Record) json() []byte {
@@ -111,6 +121,11 @@ func (r Record) json() []byte {
 // String returns a string formatted-Record
 func (r Record) String() string {
 	return fmt.Sprintf("[%v] %v (%v)", r.Tags(), r.BaseName, humanize.Bytes(uint64(r.FileSize)))
+}
+
+//Persisted returns whether the record is saved in the database
+func (r Record) Persisted() bool {
+	return r.persisted
 }
 
 // Tags break down the directory

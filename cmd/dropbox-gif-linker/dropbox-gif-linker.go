@@ -5,10 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
-	"runtime"
 	"strings"
 
+	clear "github.com/dmowcomber/go-clear"
 	humanize "github.com/dustin/go-humanize"
 	"github.com/trueheart78/dropbox-gif-linker/internal/pkg/clipboard"
 	"github.com/trueheart78/dropbox-gif-linker/internal/pkg/commands"
@@ -29,18 +28,6 @@ func url() bool {
 
 func md() bool {
 	return mode == "md"
-}
-
-func clearScreen() {
-	if runtime.GOOS == "windows" {
-		cmd := exec.Command("cmd", "/c", "cls")
-		cmd.Stdout = os.Stdout
-		cmd.Run()
-	} else {
-		cmd := exec.Command("clear")
-		cmd.Stdout = os.Stdout
-		cmd.Run()
-	}
 }
 
 func handleFirstArg(argument string) {
@@ -77,7 +64,7 @@ func init() {
 		os.Exit(1)
 	}
 
-	clearScreen()
+	clear.Clear()
 	fmt.Println(messages.Welcome(version.Current, version.ReleaseCandidate))
 }
 
@@ -98,11 +85,8 @@ func convert(link dropbox.Link, checksum string) (newGif gifkv.Record, err error
 	return
 }
 
-func capture(gifRecord gifkv.Record, increment bool) {
+func capture(gifRecord gifkv.Record) {
 	if gifRecord != (gifkv.Record{}) {
-		if increment {
-			gifRecord.Increment()
-		}
 		fmt.Println(messages.LinkTextNew(gifRecord.String()))
 		if md() {
 			fmt.Println(messages.LinkTextNew(gifRecord.Markdown()))
@@ -136,11 +120,11 @@ func handleCommand(input string, gifRecord gifkv.Record) bool {
 	} else if commands.URLMode(input) {
 		mode = "url"
 		fmt.Println(messages.ModeShift("url"))
-		capture(gifRecord, false)
+		capture(gifRecord)
 	} else if commands.MarkdownMode(input) {
 		mode = "md"
 		fmt.Println(messages.ModeShift("md"))
-		capture(gifRecord, false)
+		capture(gifRecord)
 	} else if commands.Help(input) {
 		fmt.Println(messages.Help(helpMessage()))
 	} else if commands.Config(input) {
@@ -158,7 +142,7 @@ func handleCommand(input string, gifRecord gifkv.Record) bool {
 func main() {
 	var link dropbox.Link
 	var gifRecord gifkv.Record
-	var input, cleaned, md5checksum, cachedChecksum string
+	var input, cachedInput, cleaned, md5checksum, cachedChecksum string
 	var err error
 	var continueOn bool
 	defer gifkv.Disconnect()
@@ -167,17 +151,29 @@ func main() {
 	for {
 		gifkv.Disconnect() // make sure we're always disconnected while awaiting input
 		fmt.Println(messages.AwaitingInput(mode))
+		if input != "" {
+			cachedInput = input
+		}
 		input, _ = reader.ReadString('\n')
 		input = strings.Trim(strings.TrimSpace(input), "\"'")
 		gifkv.Connect()
-		if commands.Any(input) {
+		if commands.Delete(input) && gifRecord.Persisted() {
+			fmt.Printf("Purging record %v\n", gifRecord)
+			_, err = gifRecord.Delete()
+			if err != nil {
+				fmt.Printf("Woops! %v\n", err.Error())
+				continue
+			}
+			clipboard.Write(cachedInput)
+			fmt.Println("Previous input copied to clipboard")
+		} else if commands.Any(input) {
 			continueOn = handleCommand(input, gifRecord)
 			if !continueOn {
 				break
 			}
 		} else {
 			// cache the gifRecord checksum, then reset it
-			if gifRecord != (gifkv.Record{}) {
+			if gifRecord.Persisted() {
 				cachedChecksum = gifRecord.ID
 			}
 			gifRecord = gifkv.Record{}
@@ -193,7 +189,7 @@ func main() {
 			if err == nil {
 				gifRecord, err = gifkv.Find(md5checksum)
 				if err == nil {
-					capture(gifRecord, true)
+					capture(gifRecord)
 					continue
 				}
 			}
@@ -220,7 +216,7 @@ func main() {
 				continue
 			}
 
-			capture(gifRecord, true)
+			capture(gifRecord)
 		}
 	}
 }

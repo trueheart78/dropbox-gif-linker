@@ -13,7 +13,7 @@ func TestLibrary(t *testing.T) {
 }
 
 func TestCurrent(t *testing.T) {
-	assert.Equal(t, 1.2, Current)
+	assert.Equal(t, 1.3, Current)
 }
 
 func TestReleaseCandidate(t *testing.T) {
