@@ -20,3 +20,6 @@ out/
 
 # Database
 db/
+
+# Vendor
+vendor/
