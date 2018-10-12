@@ -142,7 +142,7 @@ func handleCommand(input string, gifRecord gifkv.Record) bool {
 func main() {
 	var link dropbox.Link
 	var gifRecord gifkv.Record
-	var input, cleaned, md5checksum, cachedChecksum string
+	var input, cachedInput, cleaned, md5checksum, cachedChecksum string
 	var err error
 	var continueOn bool
 	defer gifkv.Disconnect()
@@ -151,16 +151,21 @@ func main() {
 	for {
 		gifkv.Disconnect() // make sure we're always disconnected while awaiting input
 		fmt.Println(messages.AwaitingInput(mode))
+		if input != "" {
+			cachedInput = input
+		}
 		input, _ = reader.ReadString('\n')
 		input = strings.Trim(strings.TrimSpace(input), "\"'")
 		gifkv.Connect()
-		if commands.Repair(input) && gifRecord.Persisted() {
-			fmt.Printf("Deleting %v\n", gifRecord)
+		if commands.Delete(input) && gifRecord.Persisted() {
+			fmt.Printf("Purging record %v\n", gifRecord)
 			_, err = gifRecord.Delete()
 			if err != nil {
 				fmt.Printf("Woops! %v\n", err.Error())
 				continue
 			}
+			clipboard.Write(cachedInput)
+			fmt.Println("Previous input copied to clipboard")
 		} else if commands.Any(input) {
 			continueOn = handleCommand(input, gifRecord)
 			if !continueOn {
@@ -168,7 +173,7 @@ func main() {
 			}
 		} else {
 			// cache the gifRecord checksum, then reset it
-			if gifRecord != (gifkv.Record{}) {
+			if gifRecord.Persisted() {
 				cachedChecksum = gifRecord.ID
 			}
 			gifRecord = gifkv.Record{}

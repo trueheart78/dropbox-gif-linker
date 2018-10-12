@@ -8,7 +8,7 @@ import (
 var exitCommands = [4]string{"exit", "e", "quit", "q"}
 var urlCommands = [2]string{"url", "u"}
 var markdownCommands = [2]string{"md", "m"}
-var repairCommands = [2]string{"repair", "r"}
+var deleteCommands = [2]string{"delete", "del"}
 var configCommands = [2]string{"config", "details"}
 var countCommands = [2]string{"count", "gifs"}
 var helpCommands = [2]string{"help", "?"}
@@ -30,9 +30,9 @@ func MarkdownMode(input string) bool {
 	return supported(input, markdownCommands[:])
 }
 
-// Repair returns true if the input is a repair command
-func Repair(input string) (exists bool) {
-	return supported(input, repairCommands[:])
+// Delete returns true if the input is a delete command
+func Delete(input string) (exists bool) {
+	return supported(input, deleteCommands[:])
 }
 
 // Help returns true if the input is a help command
@@ -69,7 +69,7 @@ func Any(input string) bool {
 	for _, v := range markdownCommands {
 		all = append(all, v)
 	}
-	for _, v := range repairCommands {
+	for _, v := range deleteCommands {
 		all = append(all, v)
 	}
 	for _, v := range helpCommands {
@@ -99,7 +99,7 @@ func HelpOutput() string {
 	output := "Supported Commands:\n"
 	output += fmt.Sprintf(" %v - Shift to URL Mode\n", strings.Join(urlCommands[:], ", "))
 	output += fmt.Sprintf(" %v - Shift to Markdown Mode\n", strings.Join(markdownCommands[:], ", "))
-	output += fmt.Sprintf(" %v - Repair Broken Record\n", strings.Join(repairCommands[:], ", "))
+	output += fmt.Sprintf(" %v - Delete Last Record\n", strings.Join(deleteCommands[:], ", "))
 	output += fmt.Sprintf(" %v - Database Record Count\n", strings.Join(countCommands[:], ", "))
 	output += fmt.Sprintf(" %v - Loaded Configuration\n", strings.Join(configCommands[:], ", "))
 	output += fmt.Sprintf(" %v - Version Details\n", strings.Join(versionCommands[:], ", "))
