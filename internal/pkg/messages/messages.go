@@ -63,7 +63,7 @@ func Sad(text string) string {
 
 // Error returns a properly formatted line of error-focused text
 func Error(text string, err error) string {
-	return Sad(fmt.Sprintf("%v: %v", text, err))
+	return Sad(fmt.Sprintf("%v: %v", text, err.Error()))
 }
 
 func spacing() string {
