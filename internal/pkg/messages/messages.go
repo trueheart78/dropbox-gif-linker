@@ -36,11 +36,6 @@ func ModeShift(mode string) string {
 	return color.Blue(fmt.Sprintf("♪ mode shifted to %v ♪", mode))
 }
 
-// InputError returns a properly formatted error
-func InputError(err error) string {
-	return color.Red(fmt.Sprintf("Error reading input: %v", err.Error()))
-}
-
 // LinkTextOld returns a properly formatted link
 func LinkTextOld(text string) string {
 	return color.LightGreen(fmt.Sprintf("%v", text))
@@ -64,6 +59,11 @@ func Happy(text string) string {
 // Sad returns a properly formatted line of disappointed text
 func Sad(text string) string {
 	return fmt.Sprintf("%v %v %v", skull(), color.Red(text), skull())
+}
+
+// Error returns a properly formatted line of error-focused text
+func Error(text string, err error) string {
+	return Sad(fmt.Sprintf("%v: %v", text, err))
 }
 
 func spacing() string {

@@ -1,6 +1,7 @@
 package messages
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -65,16 +66,6 @@ func TestCurrentMode(t *testing.T) {
 	assert.Equal(expected, received)
 }
 
-func TestInputError(t *testing.T) {
-	assert := assert.New(t)
-
-	err := testError{"sample error"}
-	received := InputError(err)
-	expected := "\x1b[0;31mError reading input: sample error\x1b[0m"
-
-	assert.Equal(expected, received)
-}
-
 func TestLinkTextOld(t *testing.T) {
 	assert := assert.New(t)
 
@@ -88,6 +79,15 @@ func TestLinkTextNew(t *testing.T) {
 
 	received := LinkTextNew("sample.gif")
 	expected := "\x1b[0;32msample.gif\x1b[0m"
+	assert.Equal(expected, received)
+}
+
+func TestError(t *testing.T) {
+	assert := assert.New(t)
+
+	err := errors.New("sample error")
+	received := Error("sample", err)
+	expected := "\x1b[0;31m☠️ \x1b[0m \x1b[0;31msample: sample error\x1b[0m \x1b[0;31m☠️ \x1b[0m"
 	assert.Equal(expected, received)
 }
 

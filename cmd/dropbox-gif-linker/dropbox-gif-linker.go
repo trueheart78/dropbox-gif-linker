@@ -158,10 +158,10 @@ func main() {
 		input = strings.Trim(strings.TrimSpace(input), "\"'")
 		gifkv.Connect()
 		if commands.Delete(input) && gifRecord.Persisted() {
-			fmt.Printf("Purging record %v\n", gifRecord)
+			fmt.Println(messages.Sad(fmt.Sprintf("Purging record: %v", gifRecord)))
 			_, err = gifRecord.Delete()
 			if err != nil {
-				fmt.Printf("Unable to delete! %v\n", err.Error())
+				fmt.Println(messages.Error("Unable to delete", err))
 				continue
 			}
 			clipboard.Write(cachedInput)
@@ -180,7 +180,7 @@ func main() {
 
 			cleaned, err = handler.Clean(input)
 			if err != nil {
-				fmt.Printf("Woops! %v\n", err.Error())
+				fmt.Println(messages.Error("Error handling input", err))
 				continue
 			}
 
@@ -203,13 +203,13 @@ func main() {
 							if err == nil {
 								gifRecord = gifkv.Record{}
 							} else {
-								fmt.Printf("Unable to delete! %v\n", err.Error())
+								fmt.Println(messages.Error("Unable to delete", err))
 								continue
 							}
 						}
 					} else {
 						// error checking remote status
-						fmt.Printf("Unable to verify remote status! %v\n", err.Error())
+						fmt.Println(messages.Error("Error verifying remote status", err))
 						continue
 					}
 				}
@@ -219,21 +219,21 @@ func main() {
 			link, err = dropboxClient.CreateLink(cleaned)
 			if err != nil {
 				gifRecord, _ = gifkv.Find(cachedChecksum)
-				fmt.Printf("Error creating link: %v\n", err.Error())
+				fmt.Println(messages.Error("Error creating link", err))
 				continue
 			}
 			// use the link and the checksum to create a gifRecord
 			gifRecord, err = convert(link, md5checksum)
 			if err != nil {
 				gifRecord, _ = gifkv.Find(cachedChecksum)
-				fmt.Printf("Error converting link: %v\n", err.Error())
+				fmt.Println(messages.Error("Error converting link", err))
 				continue
 			}
 			// save the gifRecord
 			_, err := gifRecord.Save()
 			if err != nil {
 				gifRecord, _ = gifkv.Find(cachedChecksum)
-				fmt.Printf("Error saving gif: %v\n", err.Error())
+				fmt.Println(messages.Error("Error saving gif", err))
 				continue
 			}
 
