@@ -115,8 +115,8 @@ func (r *Record) Delete() (bool, error) {
 	return true, nil
 }
 
-// RemoteOk checks to see if a persisted record returns a 200 status code
-func (r Record) RemoteOk() (bool, error) {
+// RemoteOK checks to see if a persisted record returns a 200 status code
+func (r Record) RemoteOK() (bool, error) {
 	if r.URL() == "" {
 		return false, errors.New("empty url")
 	}

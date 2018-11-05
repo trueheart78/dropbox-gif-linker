@@ -178,7 +178,12 @@ func TestGifRecordTags(t *testing.T) {
 func TestGifRecordURL(t *testing.T) {
 	record := generateRecord("1989", "swift")
 
+	// with a valid dropboxBaseURL
 	assert.Equal(t, "https://dl.dropboxusercontent.com/s/DROPBOX_HASH/swiftie+life+%2527the+best%2527+-+02.gif", record.URL())
+
+	// with an invalid dropboxBaseURL
+	dropboxBaseURL = ":badURL"
+	assert.Equal(t, "", record.URL())
 }
 
 func TestGifRecordMarkdown(t *testing.T) {
@@ -187,29 +192,36 @@ func TestGifRecordMarkdown(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf("![%v](%v)", record.BaseName, record.URL()), record.Markdown())
 }
 
-func TestGifRecordRemoteOk(t *testing.T) {
+func TestGifRecordRemoteOK(t *testing.T) {
 	record := generateRecord("1989", "swift")
 
 	// when a valid remote record (200 OK status)
 	urlStub := stubValidGif()
 	dropboxBaseURL = urlStub.URL
 
-	remoteOk, err := record.RemoteOk()
-	assert.True(t, remoteOk)
+	remoteOK, err := record.RemoteOK()
+	assert.True(t, remoteOK)
 	assert.Nil(t, err)
 
 	// when an invalid remote record (non-200 OK status)
 	urlStub = stubInvalidGif()
 	dropboxBaseURL = urlStub.URL
 
-	remoteOk, err = record.RemoteOk()
-	assert.False(t, remoteOk)
+	remoteOK, err = record.RemoteOK()
+	assert.False(t, remoteOK)
 	assert.Nil(t, err)
 
 	// when an invalid dropboxBaseURL
-	dropboxBaseURL = "badURL"
-	remoteOk, err = record.RemoteOk()
-	assert.False(t, remoteOk)
+	dropboxBaseURL = ":badURL"
+	remoteOK, err = record.RemoteOK()
+	assert.False(t, remoteOK)
+	assert.NotNil(t, err)
+	assert.Equal(t, "empty url", err.Error())
+
+	// when a bad dropboxBaseURL
+	dropboxBaseURL = "https://invalid.domain.example.com"
+	remoteOK, err = record.RemoteOK()
+	assert.False(t, remoteOK)
 	assert.NotNil(t, err)
 }
 
