@@ -148,7 +148,8 @@ func TestGifFind(t *testing.T) {
 	assert.Equal(t, record.SharedLinkID, recordTwo.SharedLinkID)
 	assert.True(t, recordTwo.Persisted())
 
-	_, err = Find("1989")
+	recordThree, err := Find("1989")
+	assert.Equal(t, Record{}, recordThree)
 	assert.NotNil(t, err)
 	assert.Equal(t, "Unable to find id \"1989\"", err.Error())
 
