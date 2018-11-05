@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -19,6 +20,7 @@ var db *bolt.DB
 var databasePath string
 var connected bool
 var bucketName = "gifs"
+var dropboxBaseURL = "https://dl.dropboxusercontent.com"
 
 // SetDatabasePath sets the db path
 func SetDatabasePath(filePath string) (ok bool, err error) {
@@ -113,6 +115,19 @@ func (r *Record) Delete() (bool, error) {
 	return true, nil
 }
 
+// RemoteOk checks to see if a persisted record returns a 200 status code
+func (r Record) RemoteOk() (bool, error) {
+	if r.URL() == "" {
+		return false, errors.New("empty url")
+	}
+	resp, err := http.Get(r.URL())
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
+	return resp.StatusCode == 200, nil
+}
+
 func (r Record) json() []byte {
 	data, _ := json.Marshal(r)
 	return data
@@ -137,7 +152,7 @@ func (r Record) Tags() string {
 
 // URL returns a publicly-accessible url
 func (r Record) URL() string {
-	u, err := url.Parse("https://dl.dropboxusercontent.com")
+	u, err := url.Parse(dropboxBaseURL)
 	if err != nil {
 		return ""
 	}
