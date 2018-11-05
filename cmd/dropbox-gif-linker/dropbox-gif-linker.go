@@ -165,7 +165,7 @@ func main() {
 				continue
 			}
 			clipboard.Write(cachedInput)
-			fmt.Println("Previous input copied to clipboard")
+			fmt.Println(messages.Info("Previous input copied to clipboard"))
 		} else if commands.Any(input) {
 			continueOn = handleCommand(input, gifRecord)
 			if !continueOn {

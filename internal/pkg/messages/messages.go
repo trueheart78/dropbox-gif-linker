@@ -33,7 +33,7 @@ func CurrentMode(mode string) string {
 
 // ModeShift returns the mode shifted to
 func ModeShift(mode string) string {
-	return color.Blue(fmt.Sprintf("♪ mode shifted to %v ♪", mode))
+	return color.Blue(fmt.Sprintf("🎵 mode shifted to %v 🎵", mode))
 }
 
 // LinkTextOld returns a properly formatted link
@@ -66,6 +66,11 @@ func Error(text string, err error) string {
 	return Sad(fmt.Sprintf("%v: %v", text, err.Error()))
 }
 
+// Info returns a properly formatted line of info-focused text
+func Info(text string) string {
+	return color.Blue(fmt.Sprintf("🤘🏽 %v 🤘🏽", text))
+}
+
 func spacing() string {
 	return "             "
 }
@@ -75,7 +80,7 @@ func heart() string {
 }
 
 func note() string {
-	return color.Red("♪")
+	return color.Red("🎵")
 }
 
 func skull() string {
