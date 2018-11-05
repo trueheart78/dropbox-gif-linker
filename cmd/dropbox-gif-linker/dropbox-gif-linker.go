@@ -144,7 +144,7 @@ func main() {
 	var gifRecord gifkv.Record
 	var input, cachedInput, cleaned, md5checksum, cachedChecksum string
 	var err error
-	var continueOn bool
+	var continueOn, remoteOK bool
 	defer gifkv.Disconnect()
 	reader := bufio.NewReader(os.Stdin)
 	handler := data.NewHandler()
@@ -161,7 +161,7 @@ func main() {
 			fmt.Printf("Purging record %v\n", gifRecord)
 			_, err = gifRecord.Delete()
 			if err != nil {
-				fmt.Printf("Woops! %v\n", err.Error())
+				fmt.Printf("Unable to delete! %v\n", err.Error())
 				continue
 			}
 			clipboard.Write(cachedInput)
@@ -184,13 +184,34 @@ func main() {
 				continue
 			}
 
-			// if the file pre-exists, load it
+			// if the file pre-exists, load it and validate the remote status
 			md5checksum, err = handler.MD5Checksum(cleaned)
 			if err == nil {
 				gifRecord, err = gifkv.Find(md5checksum)
 				if err == nil {
-					capture(gifRecord)
-					continue
+					// validate it is still good
+					remoteOK, err = gifRecord.RemoteOK()
+					if err == nil {
+						if remoteOK {
+							fmt.Println(messages.Happy("Remote 200 OK."))
+							capture(gifRecord)
+							continue
+						} else {
+							// if not, delete it, and move on
+							fmt.Println(messages.Sad("Remote not 200 OK. Updating cache."))
+							_, err = gifRecord.Delete()
+							if err == nil {
+								gifRecord = gifkv.Record{}
+							} else {
+								fmt.Printf("Unable to delete! %v\n", err.Error())
+								continue
+							}
+						}
+					} else {
+						// error checking remote status
+						fmt.Printf("Unable to verify remote status! %v\n", err.Error())
+						continue
+					}
 				}
 			}
 

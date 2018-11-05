@@ -56,14 +56,28 @@ func Help(text string) string {
 	return color.Green(fmt.Sprintf("%v\n", text))
 }
 
+// Happy returns a properly formatted line of disappointed text
+func Happy(text string) string {
+	return fmt.Sprintf("%v %v %v", heart(), color.Red(text), heart())
+}
+
+// Sad returns a properly formatted line of disappointed text
+func Sad(text string) string {
+	return fmt.Sprintf("%v %v %v", skull(), color.Red(text), skull())
+}
+
 func spacing() string {
 	return "             "
 }
 
 func heart() string {
-	return color.Red("♥")
+	return color.Red("💖")
 }
 
 func note() string {
 	return color.Red("♪")
+}
+
+func skull() string {
+	return color.Red("☠️ ")
 }
