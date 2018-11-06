@@ -8,18 +8,26 @@ import (
 const (
 	// Library name
 	Library = "dropbox-gif-linker"
-	// Current version of the library
-	Current = 1.4
-
+	// Major version
+	Major = 1
+	// Minor version
+	Minor = 4
+	// Patch version
+	Patch = 1
 	// ReleaseCandidate version of the library
 	ReleaseCandidate = 0
 )
 
-// Full returns the full version string
-func Full() string {
+// Current returns the semver version
+func Current() string {
 	var rc string
 	if ReleaseCandidate > 0 {
 		rc = fmt.Sprintf("-rc%d", ReleaseCandidate)
 	}
-	return fmt.Sprintf("%v version %.1f%v %v/%v", Library, Current, rc, runtime.GOOS, runtime.GOARCH)
+	return fmt.Sprintf("%d.%d.%d%v", Major, Minor, Patch, rc)
+}
+
+// Full returns the full version string
+func Full() string {
+	return fmt.Sprintf("%v version %v %v/%v", Library, Current(), runtime.GOOS, runtime.GOARCH)
 }

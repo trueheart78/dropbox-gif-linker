@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.4.1] - 2018-11-07
+
+* Better assortment of emojis.
+
 ## [1.4.0] - 2018-11-06
 
 * Cached images are now automatically checked to verify that they are currently valid on Dropbox.
