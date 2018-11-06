@@ -2,6 +2,8 @@ package gifkv
 
 import (
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
@@ -146,7 +148,8 @@ func TestGifFind(t *testing.T) {
 	assert.Equal(t, record.SharedLinkID, recordTwo.SharedLinkID)
 	assert.True(t, recordTwo.Persisted())
 
-	_, err = Find("1989")
+	recordThree, err := Find("1989")
+	assert.Equal(t, Record{}, recordThree)
 	assert.NotNil(t, err)
 	assert.Equal(t, "Unable to find id \"1989\"", err.Error())
 
@@ -176,11 +179,63 @@ func TestGifRecordTags(t *testing.T) {
 func TestGifRecordURL(t *testing.T) {
 	record := generateRecord("1989", "swift")
 
+	// with a valid dropboxBaseURL
 	assert.Equal(t, "https://dl.dropboxusercontent.com/s/DROPBOX_HASH/swiftie+life+%2527the+best%2527+-+02.gif", record.URL())
+
+	// with an invalid dropboxBaseURL
+	dropboxBaseURL = ":badURL"
+	assert.Equal(t, "", record.URL())
 }
 
 func TestGifRecordMarkdown(t *testing.T) {
 	record := generateRecord("1989", "swift")
 
 	assert.Equal(t, fmt.Sprintf("![%v](%v)", record.BaseName, record.URL()), record.Markdown())
+}
+
+func TestGifRecordRemoteOK(t *testing.T) {
+	record := generateRecord("1989", "swift")
+
+	// when a valid remote record (200 OK status)
+	urlStub := stubValidGif()
+	dropboxBaseURL = urlStub.URL
+
+	remoteOK, err := record.RemoteOK()
+	assert.True(t, remoteOK)
+	assert.Nil(t, err)
+
+	// when an invalid remote record (non-200 OK status)
+	urlStub = stubInvalidGif()
+	dropboxBaseURL = urlStub.URL
+
+	remoteOK, err = record.RemoteOK()
+	assert.False(t, remoteOK)
+	assert.Nil(t, err)
+
+	// when an invalid dropboxBaseURL
+	dropboxBaseURL = ":badURL"
+	remoteOK, err = record.RemoteOK()
+	assert.False(t, remoteOK)
+	assert.NotNil(t, err)
+	assert.Equal(t, "empty url", err.Error())
+
+	// when a bad dropboxBaseURL
+	dropboxBaseURL = "https://invalid.domain.example.com"
+	remoteOK, err = record.RemoteOK()
+	assert.False(t, remoteOK)
+	assert.NotNil(t, err)
+}
+
+func stubValidGif() *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("fake gif"))
+	}))
+}
+
+func stubInvalidGif() *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Error (401)"))
+	}))
 }

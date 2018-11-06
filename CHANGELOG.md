@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.4.0] - 2018-11-06
+
+* Cached images are now automatically checked to verify that they are currently valid on Dropbox.
+* Updated the emojis used.
+
 ## [1.3.0] - 2018-10-12
 
 * Added support for `delete` and `del` commands, to be used after the loading of a gif that has a

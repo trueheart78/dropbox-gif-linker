@@ -144,7 +144,7 @@ func main() {
 	var gifRecord gifkv.Record
 	var input, cachedInput, cleaned, md5checksum, cachedChecksum string
 	var err error
-	var continueOn bool
+	var continueOn, remoteOK bool
 	defer gifkv.Disconnect()
 	reader := bufio.NewReader(os.Stdin)
 	handler := data.NewHandler()
@@ -158,14 +158,14 @@ func main() {
 		input = strings.Trim(strings.TrimSpace(input), "\"'")
 		gifkv.Connect()
 		if commands.Delete(input) && gifRecord.Persisted() {
-			fmt.Printf("Purging record %v\n", gifRecord)
+			fmt.Println(messages.Sad(fmt.Sprintf("Purging record: %v", gifRecord)))
 			_, err = gifRecord.Delete()
 			if err != nil {
-				fmt.Printf("Woops! %v\n", err.Error())
+				fmt.Println(messages.Error("Unable to delete", err))
 				continue
 			}
 			clipboard.Write(cachedInput)
-			fmt.Println("Previous input copied to clipboard")
+			fmt.Println(messages.Info("Previous input copied to clipboard"))
 		} else if commands.Any(input) {
 			continueOn = handleCommand(input, gifRecord)
 			if !continueOn {
@@ -180,17 +180,38 @@ func main() {
 
 			cleaned, err = handler.Clean(input)
 			if err != nil {
-				fmt.Printf("Woops! %v\n", err.Error())
+				fmt.Println(messages.Error("Error handling input", err))
 				continue
 			}
 
-			// if the file pre-exists, load it
+			// if the file pre-exists, load it and validate the remote status
 			md5checksum, err = handler.MD5Checksum(cleaned)
 			if err == nil {
 				gifRecord, err = gifkv.Find(md5checksum)
 				if err == nil {
-					capture(gifRecord)
-					continue
+					// validate it is still good
+					remoteOK, err = gifRecord.RemoteOK()
+					if err == nil {
+						if remoteOK {
+							fmt.Println(messages.Happy("Remote 200 OK."))
+							capture(gifRecord)
+							continue
+						} else {
+							// if not, delete it, and move on
+							fmt.Println(messages.Sad("Remote not 200 OK. Updating cache."))
+							_, err = gifRecord.Delete()
+							if err == nil {
+								gifRecord = gifkv.Record{}
+							} else {
+								fmt.Println(messages.Error("Unable to delete", err))
+								continue
+							}
+						}
+					} else {
+						// error checking remote status
+						fmt.Println(messages.Error("Error verifying remote status", err))
+						continue
+					}
 				}
 			}
 
@@ -198,21 +219,21 @@ func main() {
 			link, err = dropboxClient.CreateLink(cleaned)
 			if err != nil {
 				gifRecord, _ = gifkv.Find(cachedChecksum)
-				fmt.Printf("Error creating link: %v\n", err.Error())
+				fmt.Println(messages.Error("Error creating link", err))
 				continue
 			}
 			// use the link and the checksum to create a gifRecord
 			gifRecord, err = convert(link, md5checksum)
 			if err != nil {
 				gifRecord, _ = gifkv.Find(cachedChecksum)
-				fmt.Printf("Error converting link: %v\n", err.Error())
+				fmt.Println(messages.Error("Error converting link", err))
 				continue
 			}
 			// save the gifRecord
 			_, err := gifRecord.Save()
 			if err != nil {
 				gifRecord, _ = gifkv.Find(cachedChecksum)
-				fmt.Printf("Error saving gif: %v\n", err.Error())
+				fmt.Println(messages.Error("Error saving gif", err))
 				continue
 			}
 

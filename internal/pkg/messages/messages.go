@@ -33,12 +33,7 @@ func CurrentMode(mode string) string {
 
 // ModeShift returns the mode shifted to
 func ModeShift(mode string) string {
-	return color.Blue(fmt.Sprintf("♪ mode shifted to %v ♪", mode))
-}
-
-// InputError returns a properly formatted error
-func InputError(err error) string {
-	return color.Red(fmt.Sprintf("Error reading input: %v", err.Error()))
+	return color.Blue(fmt.Sprintf("🎵 mode shifted to %v 🎵", mode))
 }
 
 // LinkTextOld returns a properly formatted link
@@ -56,14 +51,38 @@ func Help(text string) string {
 	return color.Green(fmt.Sprintf("%v\n", text))
 }
 
+// Happy returns a properly formatted line of disappointed text
+func Happy(text string) string {
+	return fmt.Sprintf("%v %v %v", heart(), color.Red(text), heart())
+}
+
+// Sad returns a properly formatted line of disappointed text
+func Sad(text string) string {
+	return fmt.Sprintf("%v %v %v", skull(), color.Red(text), skull())
+}
+
+// Error returns a properly formatted line of error-focused text
+func Error(text string, err error) string {
+	return Sad(fmt.Sprintf("%v: %v", text, err.Error()))
+}
+
+// Info returns a properly formatted line of info-focused text
+func Info(text string) string {
+	return color.Blue(fmt.Sprintf("🤘🏽 %v 🤘🏽", text))
+}
+
 func spacing() string {
 	return "             "
 }
 
 func heart() string {
-	return color.Red("♥")
+	return color.Red("💖")
 }
 
 func note() string {
-	return color.Red("♪")
+	return color.Red("🎵")
+}
+
+func skull() string {
+	return color.Red("☠️ ")
 }
