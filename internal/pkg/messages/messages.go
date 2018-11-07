@@ -7,13 +7,8 @@ import (
 )
 
 // Welcome returns a properly formatted greeting
-func Welcome(version float64, releaseCandidate int) string {
-	var rc string
-	if releaseCandidate > 0 {
-		rc = fmt.Sprintf("-rc%d", releaseCandidate)
-	}
-	versionOutput := color.Blue(fmt.Sprintf("v%.1f%v", version, rc))
-	return fmt.Sprintf("%v %v %v %v", heart(), color.Blue("Welcome to Dropbox Gif Listener"), versionOutput, heart())
+func Welcome(version string) string {
+	return fmt.Sprintf("%v %v %v", cheer(), color.Blue("Welcome to Dropbox Gif Listener v"+version), cheer())
 }
 
 // Goodbye returns a properly formatted goodbye
@@ -53,7 +48,7 @@ func Help(text string) string {
 
 // Happy returns a properly formatted line of disappointed text
 func Happy(text string) string {
-	return fmt.Sprintf("%v %v %v", heart(), color.Red(text), heart())
+	return fmt.Sprintf("%v %v %v", cheer(), color.Red(text), cheer())
 }
 
 // Sad returns a properly formatted line of disappointed text
@@ -76,13 +71,17 @@ func spacing() string {
 }
 
 func heart() string {
-	return color.Red("💖")
+	return "💖"
+}
+
+func cheer() string {
+	return "🎉"
 }
 
 func note() string {
-	return color.Red("🎵")
+	return "🎵"
 }
 
 func skull() string {
-	return color.Red("☠️ ")
+	return "☠️ "
 }
