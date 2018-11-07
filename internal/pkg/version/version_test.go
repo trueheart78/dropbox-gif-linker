@@ -13,7 +13,7 @@ func TestLibrary(t *testing.T) {
 }
 
 func TestCurrent(t *testing.T) {
-	assert.Equal(t, "1.4.1", Current(), 1)
+	assert.Equal(t, "1.4.1", Current())
 }
 
 func TestFullVersion(t *testing.T) {
