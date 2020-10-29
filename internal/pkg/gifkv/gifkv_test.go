@@ -193,6 +193,12 @@ func TestGifRecordMarkdown(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf("![%v](%v)", record.BaseName, record.URL()), record.Markdown())
 }
 
+func TestGifRecordBBCode(t *testing.T) {
+	record := generateRecord("1989", "swift")
+
+	assert.Equal(t, fmt.Sprintf("[img]%v[/img]", record.URL()), record.BBCode())
+}
+
 func TestGifRecordRemoteOK(t *testing.T) {
 	record := generateRecord("1989", "swift")
 

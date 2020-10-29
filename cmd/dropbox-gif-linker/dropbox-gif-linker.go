@@ -30,6 +30,10 @@ func md() bool {
 	return mode == "md"
 }
 
+func bbcode() bool {
+	return mode == "bbcode"
+}
+
 func handleFirstArg(argument string) {
 	if os.Args[1] == "version" || os.Args[1] == "--version" {
 		fmt.Println(version.Full())
@@ -91,6 +95,9 @@ func capture(gifRecord gifkv.Record) {
 		if md() {
 			fmt.Println(messages.LinkTextNew(gifRecord.Markdown()))
 			clipboard.Write(gifRecord.Markdown())
+		} else if bbcode() {
+			fmt.Println(messages.LinkTextNew(gifRecord.BBCode()))
+			clipboard.Write(gifRecord.BBCode())
 		} else {
 			fmt.Println(messages.LinkTextNew(gifRecord.URL()))
 			clipboard.Write(gifRecord.URL())
@@ -124,6 +131,10 @@ func handleCommand(input string, gifRecord gifkv.Record) bool {
 	} else if commands.MarkdownMode(input) {
 		mode = "md"
 		fmt.Println(messages.ModeShift("md"))
+		capture(gifRecord)
+	} else if commands.BBCodeMode(input) {
+		mode = "bbcode"
+		fmt.Println(messages.ModeShift("bbcode"))
 		capture(gifRecord)
 	} else if commands.Help(input) {
 		fmt.Println(messages.Help(helpMessage()))

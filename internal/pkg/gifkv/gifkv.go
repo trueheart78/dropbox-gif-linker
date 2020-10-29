@@ -165,6 +165,11 @@ func (r Record) Markdown() string {
 	return fmt.Sprintf("![%v](%v)", r.BaseName, r.URL())
 }
 
+// BBCode returns a publicly-accessible bbcode-based url
+func (r Record) BBCode() string {
+	return fmt.Sprintf("[img]%v[/img]", r.URL())
+}
+
 // Init queues up the database connection
 func Init() (ok bool, err error) {
 	if databasePath == "" {

@@ -1,5 +1,7 @@
 module github.com/trueheart78/dropbox-gif-linker
 
+go 1.15
+
 require (
 	github.com/atotto/clipboard v0.1.0
 	github.com/bclicn/color v0.0.0-20161123064900-4c02eff8a28c
