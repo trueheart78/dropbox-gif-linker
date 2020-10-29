@@ -76,7 +76,6 @@ createRelease() {
 }
 
 # Mac Releases
-createRelease darwin 386
 createRelease darwin amd64
 
 # PowerPC Releases
