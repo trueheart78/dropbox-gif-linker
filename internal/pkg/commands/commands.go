@@ -8,6 +8,7 @@ import (
 var exitCommands = [4]string{"exit", "e", "quit", "q"}
 var urlCommands = [2]string{"url", "u"}
 var markdownCommands = [2]string{"md", "m"}
+var bbcodeCommands = [2]string{"bbcode", "b"}
 var deleteCommands = [2]string{"delete", "del"}
 var configCommands = [2]string{"config", "details"}
 var countCommands = [2]string{"count", "gifs"}
@@ -28,6 +29,11 @@ func URLMode(input string) (exists bool) {
 // MarkdownMode returns true if the input is a markdown mode command
 func MarkdownMode(input string) bool {
 	return supported(input, markdownCommands[:])
+}
+
+// BbcodeMode returns true if the input is a bbcode mode command
+func BbcodeMode(input string) bool {
+	return supported(input, bbcodeCommands[:])
 }
 
 // Delete returns true if the input is a delete command
@@ -69,6 +75,9 @@ func Any(input string) bool {
 	for _, v := range markdownCommands {
 		all = append(all, v)
 	}
+	for _, v := range bbcodeCommands {
+		all = append(all, v)
+	}
 	for _, v := range deleteCommands {
 		all = append(all, v)
 	}
@@ -99,6 +108,7 @@ func HelpOutput() string {
 	output := "Supported Commands:\n"
 	output += fmt.Sprintf(" %v - Shift to URL Mode\n", strings.Join(urlCommands[:], ", "))
 	output += fmt.Sprintf(" %v - Shift to Markdown Mode\n", strings.Join(markdownCommands[:], ", "))
+	output += fmt.Sprintf(" %v - Shift to BBCode Mode\n", strings.Join(bbcodeCommands[:], ", "))
 	output += fmt.Sprintf(" %v - Delete Last Record\n", strings.Join(deleteCommands[:], ", "))
 	output += fmt.Sprintf(" %v - Database Record Count\n", strings.Join(countCommands[:], ", "))
 	output += fmt.Sprintf(" %v - Loaded Configuration\n", strings.Join(configCommands[:], ", "))

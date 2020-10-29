@@ -11,6 +11,7 @@ func TestSupportedCommands(t *testing.T) {
 	assert.Equal(t, [4]string{"exit", "e", "quit", "q"}, exitCommands)
 	assert.Equal(t, [2]string{"url", "u"}, urlCommands)
 	assert.Equal(t, [2]string{"md", "m"}, markdownCommands)
+	assert.Equal(t, [2]string{"bbcode", "b"}, bbcodeCommands)
 	assert.Equal(t, [2]string{"delete", "del"}, deleteCommands)
 	assert.Equal(t, [2]string{"version", "v"}, versionCommands)
 	assert.Equal(t, [2]string{"help", "?"}, helpCommands)
@@ -32,6 +33,7 @@ func TestExit(t *testing.T) {
 
 	assert.False(Exit("url"))
 	assert.False(Exit("md"))
+	assert.False(Exit("bbcode"))
 	assert.False(Exit("delete"))
 	assert.False(Exit("config"))
 	assert.False(Exit("help"))
@@ -49,6 +51,7 @@ func TestURLMode(t *testing.T) {
 	assert.True(URLMode(":u"))
 
 	assert.False(URLMode("md"))
+	assert.False(URLMode("bbcode"))
 	assert.False(URLMode("exit"))
 	assert.False(URLMode("delete"))
 	assert.False(URLMode("config"))
@@ -67,6 +70,7 @@ func TestMarkdownMode(t *testing.T) {
 	assert.True(MarkdownMode(":m"))
 
 	assert.False(MarkdownMode("url"))
+	assert.False(MarkdownMode("bbcode"))
 	assert.False(MarkdownMode("exit"))
 	assert.False(MarkdownMode("delete"))
 	assert.False(MarkdownMode("config"))
@@ -74,6 +78,25 @@ func TestMarkdownMode(t *testing.T) {
 	assert.False(MarkdownMode("count"))
 	assert.False(MarkdownMode("version"))
 	assert.False(MarkdownMode("taylor"))
+}
+
+func TestBbcodeMode(t *testing.T) {
+	assert := assert.New(t)
+
+	assert.True(BbcodeMode("bbcode"))
+	assert.True(BbcodeMode("b"))
+	assert.True(BbcodeMode(":bbcode"))
+	assert.True(BbcodeMode(":b"))
+
+	assert.False(BbcodeMode("url"))
+	assert.False(BbcodeMode("md"))
+	assert.False(BbcodeMode("exit"))
+	assert.False(BbcodeMode("delete"))
+	assert.False(BbcodeMode("config"))
+	assert.False(BbcodeMode("help"))
+	assert.False(BbcodeMode("count"))
+	assert.False(BbcodeMode("version"))
+	assert.False(BbcodeMode("taylor"))
 }
 
 func TestDelete(t *testing.T) {
@@ -86,6 +109,7 @@ func TestDelete(t *testing.T) {
 
 	assert.False(Delete("url"))
 	assert.False(Delete("md"))
+	assert.False(Delete("bbcode"))
 	assert.False(Delete("help"))
 	assert.False(Delete("exit"))
 	assert.False(Delete("config"))
@@ -104,6 +128,7 @@ func TestHelp(t *testing.T) {
 
 	assert.False(Help("url"))
 	assert.False(Help("md"))
+	assert.False(Help("bbcode"))
 	assert.False(Help("exit"))
 	assert.False(Help("delete"))
 	assert.False(Help("config"))
@@ -120,6 +145,7 @@ func TestConfig(t *testing.T) {
 
 	assert.False(Config("url"))
 	assert.False(Config("md"))
+	assert.False(Config("bbcode"))
 	assert.False(Config("help"))
 	assert.False(Config("delete"))
 	assert.False(Config("exit"))
@@ -135,6 +161,7 @@ func TestCount(t *testing.T) {
 
 	assert.False(Count("url"))
 	assert.False(Count("md"))
+	assert.False(Count("bbcode"))
 	assert.False(Count("help"))
 	assert.False(Count("delete"))
 	assert.False(Count("exit"))
@@ -150,6 +177,7 @@ func TestVersion(t *testing.T) {
 
 	assert.False(Version("url"))
 	assert.False(Version("md"))
+	assert.False(Version("bbcode"))
 	assert.False(Version("help"))
 	assert.False(Version("delete"))
 	assert.False(Version("exit"))
@@ -165,6 +193,7 @@ func TestTaylor(t *testing.T) {
 
 	assert.False(Taylor("url"))
 	assert.False(Taylor("md"))
+	assert.False(Taylor("bbcode"))
 	assert.False(Taylor("help"))
 	assert.False(Taylor("delete"))
 	assert.False(Taylor("exit"))
@@ -176,6 +205,7 @@ func TestTaylor(t *testing.T) {
 func TestAny(t *testing.T) {
 	assert.True(t, Any("url"))
 	assert.True(t, Any("md"))
+	assert.True(t, Any("bbcode"))
 	assert.True(t, Any("help"))
 	assert.True(t, Any("delete"))
 	assert.True(t, Any("exit"))
