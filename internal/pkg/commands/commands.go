@@ -31,8 +31,8 @@ func MarkdownMode(input string) bool {
 	return supported(input, markdownCommands[:])
 }
 
-// BbcodeMode returns true if the input is a bbcode mode command
-func BbcodeMode(input string) bool {
+// BBCodeMode returns true if the input is a bbcode mode command
+func BBCodeMode(input string) bool {
 	return supported(input, bbcodeCommands[:])
 }
 

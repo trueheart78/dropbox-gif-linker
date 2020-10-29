@@ -80,23 +80,23 @@ func TestMarkdownMode(t *testing.T) {
 	assert.False(MarkdownMode("taylor"))
 }
 
-func TestBbcodeMode(t *testing.T) {
+func TestBBCodeMode(t *testing.T) {
 	assert := assert.New(t)
 
-	assert.True(BbcodeMode("bbcode"))
-	assert.True(BbcodeMode("b"))
-	assert.True(BbcodeMode(":bbcode"))
-	assert.True(BbcodeMode(":b"))
+	assert.True(BBCodeMode("bbcode"))
+	assert.True(BBCodeMode("b"))
+	assert.True(BBCodeMode(":bbcode"))
+	assert.True(BBCodeMode(":b"))
 
-	assert.False(BbcodeMode("url"))
-	assert.False(BbcodeMode("md"))
-	assert.False(BbcodeMode("exit"))
-	assert.False(BbcodeMode("delete"))
-	assert.False(BbcodeMode("config"))
-	assert.False(BbcodeMode("help"))
-	assert.False(BbcodeMode("count"))
-	assert.False(BbcodeMode("version"))
-	assert.False(BbcodeMode("taylor"))
+	assert.False(BBCodeMode("url"))
+	assert.False(BBCodeMode("md"))
+	assert.False(BBCodeMode("exit"))
+	assert.False(BBCodeMode("delete"))
+	assert.False(BBCodeMode("config"))
+	assert.False(BBCodeMode("help"))
+	assert.False(BBCodeMode("count"))
+	assert.False(BBCodeMode("version"))
+	assert.False(BBCodeMode("taylor"))
 }
 
 func TestDelete(t *testing.T) {
