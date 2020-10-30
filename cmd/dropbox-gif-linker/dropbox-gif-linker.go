@@ -47,6 +47,10 @@ func handleFirstArg(argument string) {
 	if os.Args[1] == "url" {
 		mode = "url"
 	}
+
+	if os.Args[1] == "b" || os.Args[1] == "bbcode" {
+		mode = "bbcode"
+	}
 }
 
 func init() {
