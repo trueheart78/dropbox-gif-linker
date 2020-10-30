@@ -13,7 +13,7 @@ const (
 	// Minor version
 	Minor = 5
 	// Patch version
-	Patch = 0
+	Patch = 1
 	// ReleaseCandidate version of the library
 	ReleaseCandidate = 0
 )
