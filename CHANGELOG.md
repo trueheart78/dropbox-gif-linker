@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.5.1] - 2020-10-30
+
+* Added support for BBCode as the initial mode during startup.
+  * Use either `dropbox-gif-linker bbcode` or `dropbox-gif-linker b`.
+
+## [1.5.0] - 2020-10-29
+
+* Added support for BBCode.
+  * Enable using either the `bbcode` or `b` commands.
+
 ## [1.4.1] - 2018-11-07
 
 * Better assortment of emojis.
