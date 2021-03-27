@@ -50,7 +50,7 @@ Need the current version?
 
 ```
 $ dropbox-gif-linker version
-dropbox-gif-linker version 1.1 darwin/amd64
+dropbox-gif-linker version 1.51 darwin/amd64
 ```
 
 Would you prefer to start in `markdown` mode?
@@ -63,6 +63,12 @@ Need to force it to start in `url` mode?
 
 ```
 $ dropbox-gif-linker url
+```
+
+Need to force it to start in `bbcode` mode?
+
+```
+$ dropbox-gif-linker bbcode
 ```
 
 ![listener example](assets/images/listener-example.gif?date=2018-08-16)
